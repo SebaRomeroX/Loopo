@@ -10,7 +10,6 @@ labels: [documentation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
-worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-write-greenfield-exploration-and-mvp-spec
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-write-greenfield-exploration-and-mvp-spec.md

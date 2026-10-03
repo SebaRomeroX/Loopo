@@ -10,7 +10,6 @@ labels: [ci, blocked-merge]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
-worktree_path: /home/sebarmx/Documents/GitHub/Loopo-bug-ci-seam-generated-by-unreleased-arggon-main
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/bug-ci-seam-generated-by-unreleased-arggon-main.md

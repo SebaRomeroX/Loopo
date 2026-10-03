@@ -10,7 +10,6 @@ labels: [documentation]
 priority: p2
 created: "2026-10-03"
 updated: "2026-10-03"
-worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-testing-policy
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-mvp-testing-policy.md
