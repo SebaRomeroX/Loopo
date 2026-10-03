@@ -27,3 +27,6 @@ updated: "2026-10-03"
 <!-- The real acceptance criteria; tick each box when met. -->
 
 ## Notes
+
+### 2026-10-03 @ses_efd5fb7b9ffeQRYizJKKwA6ggv
+Superseded within claim `task-write-greenfield-exploration-and-mvp-spec`: the MVP spec was written there as `ArggonManager/docs/specs/spec-loopo-mvp-001.md` (validate ok, analyze 0 findings, 2026-10-03). Cancelling this duplicate so the pool stays clean; per the never-reopen rule it will not be picked up again — file a new task if more spec work appears.
