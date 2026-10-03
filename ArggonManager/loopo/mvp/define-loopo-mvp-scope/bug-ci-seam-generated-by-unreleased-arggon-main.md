@@ -48,6 +48,24 @@ Root cause (reproduced locally in a clean clone of `main`):
 
 Remedy candidates (decision needed — spans ArggonManager's release process):
 
+**Chosen 2026-10-03 (option 1) — applied on
+`fix/bug-ci-seam-generated-by-unreleased-arggon-main`:** pin CI's generator to
+the seam's commit. The literal `npm i -g "git+…#<sha>"` variant does NOT work
+for this package — two independent failures, both reproduced locally:
+
+1. `prepare` (`npm run build`) inherits the global flag and dies with
+   "Workspaces not supported for global packages";
+2. a local-prefix git install completes, but outside the workspace npm
+   resolves `@arggondev/lib` from the registry — the stale published 0.5.0
+   lacks exports the pinned commit needs (`acceptanceBody`) and the CLI
+   crashes on start.
+
+Working recipe (applied in the workflow's install step, verified end-to-end
+against all four CI steps): clone `ArggonManager` → `checkout --detach
+<sha>` → `npm ci --ignore-scripts` → `npm run build` → PATH shim executing
+the clone's `dist/cli.js`. Workspace links stay intact; downstream steps
+(`arggon init` / `validate` / `doctor`) are unchanged.
+
 1. **Pin the workflow install to the seam's git commit** (e.g.
    `npm install -g "git+https://github.com/Arggon/ArggonManager.git#8e3e9214"`).
    Green immediately, generator byte-identical to the seam, keeps the newer
@@ -67,10 +85,17 @@ Remedy candidates (decision needed — spans ArggonManager's release process):
 
 - [ ] One remedy above is applied and `tasks-validate` is green on `main`.
 - [ ] A subsequent PR run of `tasks-validate` is green (not only `push`).
-- [ ] Local `arggon init --no-commit` with the developer's own `arggon` build
-      leaves the tree clean (no flip-flop between generators).
-- [ ] The chosen remedy is recorded here (or in an ADR) so the next release
-      knows what to re-pin.
+- [x] Generator stability: `arggon init --no-commit` with either the pinned
+      SHA build or the developer's own git-main build leaves every gate-relevant
+      generated file byte-identical (only the excluded `.convention.yml`
+      timestamps refresh); `init` preserves the workflow because it is
+      adopter-modified, so the pin survives local inits.
+- [x] The chosen remedy is recorded here (or in an ADR) so the next release
+      knows what to re-pin: option 1 (git-SHA generator pin) chosen
+      2026-10-03 — on release of an ArggonManager version containing
+      `8e3e9214`, drop `ARGGON_GENERATOR_SHA`, restore the install step to
+      `arggon-manager@$ARGGON_VERSION`, bump the literal, and re-run `arggon
+      init` with that release.
 
 ## Notes
 
