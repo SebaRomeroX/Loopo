@@ -1,13 +1,17 @@
 ---
 type: task
-status: todo
+status: in_progress
 id: task-mvp-testing-policy
 title: "Reconcile testing policy: manual smoke vs review bar"
+assignee: SebaRomeroX
+branch: feat/task-mvp-testing-policy
 parent: define-loopo-mvp-scope
 labels: [documentation]
 priority: p2
 created: "2026-10-03"
 updated: "2026-10-03"
+claimed_at: "2026-10-03T20:22:06.594Z"
+worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-testing-policy
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-mvp-testing-policy.md
