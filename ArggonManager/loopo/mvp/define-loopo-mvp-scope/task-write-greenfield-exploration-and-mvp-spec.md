@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-write-greenfield-exploration-and-mvp-spec
 title: Write greenfield exploration and MVP spec
 assignee: SebaRomeroX
@@ -10,7 +10,6 @@ labels: [documentation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
-claimed_at: "2026-10-03T16:40:28.974Z"
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-write-greenfield-exploration-and-mvp-spec
 ---
 <!--
