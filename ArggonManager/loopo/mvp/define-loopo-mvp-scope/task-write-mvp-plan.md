@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-write-mvp-plan
 title: Write the Loopo MVP implementation plan
 assignee: SebaRomeroX
@@ -10,7 +10,6 @@ labels: [documentation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
-claimed_at: "2026-10-03T20:07:54.122Z"
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-write-mvp-plan
 ---
 <!--
