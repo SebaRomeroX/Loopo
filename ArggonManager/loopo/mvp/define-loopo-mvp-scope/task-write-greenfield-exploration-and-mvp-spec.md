@@ -45,7 +45,7 @@ artifacts that unlock implementation:
 - [x] `arggon spec analyze` → no findings (ambiguity, consistency, decisions).
 - [x] `arggon validate` green before every commit.
 - [x] Follow-ups filed as tracked items (ADR 0001, testing policy, Web Push).
-- [ ] Draft PR reviewed and merged with this item id referenced.
+- [x] Draft PR reviewed and merged with this item id referenced.
 
 ## Notes
 

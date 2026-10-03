@@ -48,7 +48,7 @@ of record.
       follow-up items where they exist.
 - [x] `arggon validate` green on the branch.
 - [x] Draft PR opened referencing this item id.
-- [ ] PR merged after coordinator review (ADR status flips to `Accepted` in
+- [x] PR merged after coordinator review (ADR status flips to `Accepted` in
       the merge).
 
 ## Notes

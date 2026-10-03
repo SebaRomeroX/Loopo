@@ -1,6 +1,6 @@
 # ADR 0001: Static webapp + localStorage for the Loopo MVP
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-03
 - **Deciders:** SebaRomeroX (product owner); Loopo MVP scope exploration, rounds 1–5
 

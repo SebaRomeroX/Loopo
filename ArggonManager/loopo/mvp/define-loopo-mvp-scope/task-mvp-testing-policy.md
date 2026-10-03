@@ -43,7 +43,7 @@ on this item. Supersession recorded here and in
 - [x] Exploration round-5 wording superseded ("same PR as first behavior
       change" → "own docs PR before T1") — recorded in this item and the
       plan.
-- [ ] PR merged (docs-only, smoke-exempt).
+- [x] PR merged (docs-only, smoke-exempt).
 
 ## Notes
 

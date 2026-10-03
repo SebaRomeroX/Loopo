@@ -46,7 +46,7 @@ whose `depends_on` edges encode the ordering.
 - [x] `arggon spec validate` passes for the plan file; `arggon validate` green.
 - [x] Draft PR opened referencing this item id: **#4**
       (`feat/task-write-mvp-plan`).
-- [ ] PR merged after coordinator review.
+- [x] PR merged after coordinator review.
 
 ## Notes
 
