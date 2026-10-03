@@ -84,7 +84,8 @@ the clone's `dist/cli.js`. Workspace links stay intact; downstream steps
 ## Acceptance
 
 - [ ] One remedy above is applied and `tasks-validate` is green on `main`.
-- [ ] A subsequent PR run of `tasks-validate` is green (not only `push`).
+- [x] A subsequent PR run of `tasks-validate` is green (not only `push`) —
+      run `37147134233` on PR #3: `tasks-validate: success`.
 - [x] Generator stability: `arggon init --no-commit` with either the pinned
       SHA build or the developer's own git-main build leaves every gate-relevant
       generated file byte-identical (only the excluded `.convention.yml`
