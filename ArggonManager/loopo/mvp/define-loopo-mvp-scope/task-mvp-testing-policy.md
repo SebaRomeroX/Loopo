@@ -49,3 +49,9 @@ on this item. Supersession recorded here and in
 
 - Blocks `task-mvp-t1-shell-empty-state` via `depends_on` (priority p2 —
   dependency gating is readiness-based, not priority-based).
+- Draft PR: **#5** (`feat/task-mvp-testing-policy`). CI is expected red on
+  the drift gate until PR #3 merges (the merge ref carries the un-pinned
+  workflow — same known issue as #1/#2/#4); re-run after #3 merges.
+- Drift-gate safety verified: `arggon init --no-commit` with the pinned
+  generator preserves the amended `engineering.md` (only the excluded
+  `.convention.yml` goes dirty).
