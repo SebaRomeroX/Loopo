@@ -21,10 +21,19 @@ depends_on: [task-mvp-t2-localstorage-store]
 
 ## Context
 
-<!-- Why this task exists. -->
+Wave 2, parallel-eligible with T3 (plan §T4): due computation over the
+stored IANA zone (`Date` + `Intl.DateTimeFormat`, ADR 0001) — `loop`
+recurrence keeping wall-clock time across DST transitions, `date` countdown,
+`counter` elapsed; recomputed on load, on a timer while open, and on
+`visibilitychange`/focus.
 
 ## Acceptance
 
-<!-- The real acceptance criteria; tick each box when met. -->
+- [ ] A `loop` rule fires at the same wall-clock time after a DST transition
+      in its stored zone.
+- [ ] A `date` task reaches due without rendering negative day counts.
+- [ ] A `counter` task's elapsed display refreshes while the app is open.
 
 ## Notes
+
+- Produces the occurrence stream that T5 dedupes.

@@ -21,10 +21,20 @@ depends_on: [task-mvp-t1-shell-empty-state]
 
 ## Context
 
-<!-- Why this task exists. -->
+Wave 1 (plan §T2): the persistence core — task model and the `loopo.tasks`
+versioned envelope with atomic save, forward migration, backup of
+unparseable/unknown-`schemaVersion` input, and quota-safe writes. Spec
+invariant 1 ("stored tasks are never destroyed on read") is implemented here.
 
 ## Acceptance
 
-<!-- The real acceptance criteria; tick each box when met. -->
+- [ ] `schemaVersion` envelope: an older envelope migrates forward; an
+      unknown/newer envelope is copied to `loopo.tasks.backup` before the
+      store ever resets to empty.
+- [ ] Unparseable JSON backs up the raw value and never crashes the load
+      path (empty list + reported failure, never a silent wipe).
+- [ ] A save rejected by quota leaves the stored list byte-identical.
 
 ## Notes
+
+- Depends on T1 (entry-module wiring); T3 and T4 both branch from here.

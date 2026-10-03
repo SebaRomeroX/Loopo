@@ -21,10 +21,19 @@ depends_on: [task-mvp-t2-localstorage-store]
 
 ## Context
 
-<!-- Why this task exists. -->
+Wave 2, parallel-eligible with T4 (plan §T3): list view plus the add/edit
+form whose kind picker (`loop`/`date`/`counter`) swaps the second field
+(every-N + unit, target date, start instant); create/edit/delete wired
+through the T2 store; all rendering via `textContent` only.
 
 ## Acceptance
 
-<!-- The real acceptance criteria; tick each box when met. -->
+- [ ] A task can be created, edited and deleted with exactly one kind
+      (`loop`/`date`/`counter`); all three kinds survive a reload.
+- [ ] Titles render via `textContent` only — a task titled
+      `<img src=x onerror=...>` never executes.
 
 ## Notes
+
+- File-disjoint from T4 except the entry module; if both touch it, T3 merges
+  first (plan waves).

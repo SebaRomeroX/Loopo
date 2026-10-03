@@ -21,10 +21,27 @@ depends_on: [task-write-greenfield-exploration-and-mvp-spec, task-adr-0001-stati
 
 ## Context
 
-<!-- Why this task exists. -->
+Wave 1 of the plan (`ArggonManager/docs/plans/plan-loopo-mvp-001.md` §T1).
+Builds the static entry structure every later task hangs off: `index.html`,
+`styles.css`, an ES-module entry, single-column mobile-first layout, and the
+empty state with one example per reminder kind. Spec:
+`ArggonManager/docs/specs/spec-loopo-mvp-001.md`.
+
+First behavior PR: `depends_on` requires the spec, ADR, plan and
+testing-policy items to reach terminal status first (one branch per item).
 
 ## Acceptance
 
-<!-- The real acceptance criteria; tick each box when met. -->
+- [ ] `index.html` + `styles.css` + ES-module `.js` files load straight from
+      static files with no build step: no `package.json`, no bundling, no
+      vendored third-party code.
+- [ ] First run renders an empty state listing one example task per reminder
+      kind (`loop`, `date`, `counter`).
+- [ ] Usable at a 320 px viewport: single-column layout, no hover-only
+      affordances.
 
 ## Notes
+
+- Plan waves: T1 → T2 sequential; `task-mvp-testing-policy` must merge before
+  this PR passes review (supersession of exploration round 5 recorded in the
+  plan).
