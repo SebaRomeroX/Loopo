@@ -36,12 +36,12 @@ testing-policy items to reach terminal status first (one branch per item).
 
 ## Acceptance
 
-- [ ] `index.html` + `styles.css` + ES-module `.js` files load straight from
+- [x] `index.html` + `styles.css` + ES-module `.js` files load straight from
       static files with no build step: no `package.json`, no bundling, no
       vendored third-party code.
-- [ ] First run renders an empty state listing one example task per reminder
+- [x] First run renders an empty state listing one example task per reminder
       kind (`loop`, `date`, `counter`).
-- [ ] Usable at a 320 px viewport: single-column layout, no hover-only
+- [x] Usable at a 320 px viewport: single-column layout, no hover-only
       affordances.
 
 ## Notes
@@ -49,3 +49,12 @@ testing-policy items to reach terminal status first (one branch per item).
 - Plan waves: T1 → T2 sequential; `task-mvp-testing-policy` must merge before
   this PR passes review (supersession of exploration round 5 recorded in the
   plan).
+- Evidence (2026-10-03, author env): five static files, no `package.json`/
+  `node_modules`; all five paths serve `200` from a plain
+  `python3 -m http.server` (`.js` as `text/javascript`); `node --check` passes
+  on all three modules; a scratch DOM-stub run of `js/main.js` (not committed —
+  manual smoke is the policy) observes one `section.empty-state` with exactly
+  Loop/Date/Counter × Drink water/Math exam/Called mom and non-empty details;
+  CSS contains zero `:hover` rules and only `max-width` (inside the
+  ≥640 px enhancement query). Visual confirmation at a 320 px viewport
+  requested at PR review — no browser in the authoring environment.
