@@ -1,13 +1,17 @@
 ---
 type: task
-status: todo
+status: in_progress
 id: task-adr-0001-static-webapp-localstorage
 title: "Record ADR 0001: static webapp + localStorage for the Loopo MVP"
+assignee: SebaRomeroX
+branch: feat/task-adr-0001-static-webapp-localstorage
 parent: define-loopo-mvp-scope
 labels: [documentation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
+claimed_at: "2026-10-03T18:52:13.243Z"
+worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-adr-0001-static-webapp-localstorage
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-adr-0001-static-webapp-localstorage.md
