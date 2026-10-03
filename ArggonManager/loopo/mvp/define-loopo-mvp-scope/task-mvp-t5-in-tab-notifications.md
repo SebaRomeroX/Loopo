@@ -8,6 +8,7 @@ labels: [implementation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
+depends_on: [task-mvp-t4-reminder-engine]
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-mvp-t5-in-tab-notifications.md
