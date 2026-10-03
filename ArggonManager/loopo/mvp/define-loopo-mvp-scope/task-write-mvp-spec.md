@@ -1,6 +1,6 @@
 ---
 type: task
-status: todo
+status: cancelled
 id: task-write-mvp-spec
 title: Write MVP spec from exploration-loopo-mvp-001 edge cases
 parent: define-loopo-mvp-scope
