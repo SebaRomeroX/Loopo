@@ -152,7 +152,8 @@ Cross-cutting (stack + persistence schema + hosting) → ADR
 `ArggonManager/docs/adr/0001-static-webapp-localstorage.md` (**Proposed**),
 tracked as `task-adr-0001-static-webapp-localstorage`. Artifacts in order: this
 doc → ADR → spec with the edge-case rows above as acceptance criteria
-(`task-write-mvp-spec`) → plan/tasks with `depends_on`. Delivery-while-closed is
+(`ArggonManager/docs/specs/spec-loopo-mvp-001.md`, written) → plan/tasks with
+`depends_on`. Delivery-while-closed is
 deferred as `task-deliver-reminders-while-the-tab-is-closed-web-push` (label
 `post-mvp`).
 

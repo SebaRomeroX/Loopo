@@ -24,10 +24,26 @@ worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-write-greenfield-explor
 
 ## Context
 
-<!-- Why this task exists. -->
+Greenfield gate (ADR 0017) for the Loopo MVP. Produces the two upstream
+artifacts that unlock implementation:
+
+1. Exploration: `ArggonManager/docs/explorations/exploration-loopo-mvp-001.md`
+   (six-phase protocol, rounds 1–5, edge-case hunt).
+2. Spec: `ArggonManager/docs/specs/spec-loopo-mvp-001.md` — its acceptance
+   criteria are the exploration's edge-case rows.
 
 ## Acceptance
 
-<!-- The real acceptance criteria; tick each box when met. -->
+- [x] Exploration recorded with classification, frontier-round log (1–5),
+      full 13-row edge-case table, 3 approaches and one recommendation.
+- [x] Round-5 clarifications applied: zero-build vanilla JS, mobile-first,
+      reminder kinds `loop`/`date`/`counter`, manual smoke.
+- [x] Spec written with Purpose (invariants + non-goals), Synopsis (storage
+      envelope, UI, failure paths) and testable Acceptance rows.
+- [x] `arggon spec validate` → `ok: true`.
+- [x] `arggon spec analyze` → no findings (ambiguity, consistency, decisions).
+- [x] `arggon validate` green before every commit.
+- [x] Follow-ups filed as tracked items (ADR 0001, testing policy, Web Push).
+- [ ] Draft PR reviewed and merged with this item id referenced.
 
 ## Notes
