@@ -58,3 +58,31 @@ testing-policy items to reach terminal status first (one branch per item).
   CSS contains zero `:hover` rules and only `max-width` (inside the
   ≥640 px enhancement query). Visual confirmation at a 320 px viewport
   requested at PR review — no browser in the authoring environment.
+- Browser smoke P1 observed (2026-10-03, chromium via `playwright-cli`,
+  viewport 320×568, served by `python3 -m http.server`): `innerWidth: 320` and
+  `scrollWidth: 320` (no horizontal overflow); `.examples` computed to a single
+  `288px` grid track; `:hover` rules in stylesheets = 0; `h2` = "No reminders
+  yet"; `aria-labelledby="empty-state-title"` resolves; exactly 3 examples
+  (Loop/Drink water/"every 2 hours", Date/Math exam/"Sun, Oct 18, 2026",
+  Counter/Called mom/"since Sep 24, 2026"); console zero entries after the
+  explicit `data:,` favicon link; screenshot visually checked — matches.
+  Probe raised by the reviewer and executed by the coordinator (owner of the
+  verdict write).
+
+### 2026-10-03 @SebaRomeroX
+Review verdict (arggon-reviewer, session ses_efc3fc34bffegvSIwsEpaV5lCR) — relayed by the coordinator; conditional verdict satisfied.
+
+Verdict at review: NO-MERGE today → MERGE once the real-browser 320 px probe (P1) is green and recorded (P1 was the reviewer's only merge gate).
+
+P1 observed (2026-10-03, chromium via playwright-cli, viewport 320×568, python3 -m http.server):
+- innerWidth 320 / scrollWidth 320 → no horizontal overflow
+- `.examples` computed grid = single track "288px"
+- stylesheet `:hover` rules = 0
+- h2 "No reminders yet"; aria-labelledby="empty-state-title" resolves
+- exactly 3 examples: Loop/Drink water/"every 2 hours", Date/Math exam/"Sun, Oct 18, 2026", Counter/Called mom/"since Sep 24, 2026"
+- console: zero entries after the explicit `data:,` favicon link; screenshot visually checked
+→ reviewer's own flip criterion met: verdict = MERGE.
+
+Also applied (reviewer-endorsed): should-fix — ARCHITECTURE.md code map lists the real app tree and drops the phantom `src/` (docs travel with code); nit — `detailFor` throws on an unknown kind (2a1fa69); favicon data: link silences the automatic /favicon.ico 404 (874abc6).
+
+Reviewer independently reproduced first-hand: static-serve 200s with text/javascript, node --check ×3, DOM-stub render byte-for-byte, TZ-stability of date/counter rendering (UTC / Kiritimati / Honolulu / Anchorage), zero-build greps, validate ok, CI green post-pin. Evidence recorded on the item Notes and in the PR body.
