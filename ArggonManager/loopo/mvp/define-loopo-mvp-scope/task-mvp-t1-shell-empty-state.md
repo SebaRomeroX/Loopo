@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-mvp-t1-shell-empty-state
 title: "MVP T1: static shell, mobile-first layout, empty state"
 assignee: SebaRomeroX
@@ -10,7 +10,6 @@ labels: [implementation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
-claimed_at: "2026-10-03T21:42:25.774Z"
 depends_on: [task-write-greenfield-exploration-and-mvp-spec, task-adr-0001-static-webapp-localstorage, task-write-mvp-plan, task-mvp-testing-policy]
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t1-shell-empty-state
 ---
