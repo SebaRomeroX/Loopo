@@ -142,9 +142,10 @@ target; desktop is the enhancement).
 
 Trade-offs accepted: hand-rolled DOM state (bounded by three reminder kinds);
 no type-checking/minification (0-dep target, round 5); manual smoke only instead
-of automated tests (round 5 — conflicts with `docs/engineering.md`'s review bar,
-resolved by `task-mvp-testing-policy` in the same PR as the first behavior
-change); no sync or backup (loss risk explicitly accepted, round 3); no
+of automated tests (round 5 — conflicts with `docs/engineering.md`'s review bar;
+superseded: `task-mvp-testing-policy` resolves it in its own docs PR before the
+first behavior change — one branch per item — recorded in that item and in
+`plan-loopo-mvp-001`); no sync or backup (loss risk explicitly accepted, round 3); no
 notifications while the tab is closed (Web Push filed as post-MVP). Rejected: B
 (bundle tooling for a 0-dep target) and C (framework the MVP does not need).
 
