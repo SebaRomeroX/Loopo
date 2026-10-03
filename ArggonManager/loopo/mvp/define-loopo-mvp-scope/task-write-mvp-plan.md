@@ -24,10 +24,31 @@ worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-write-mvp-plan
 
 ## Context
 
-<!-- Why this task exists. -->
+The pipeline artifact after the ADR: exploration → ADR → spec → **plan**.
+`ArggonManager/docs/plans/plan-loopo-mvp-001.md` breaks the spec
+(`spec-loopo-mvp-001.md`, ADR 0017 gate — analyze clean) into six ordered
+tasks T1–T6 with waves, and each task mirrors a tracked implementation item
+whose `depends_on` edges encode the ordering.
 
 ## Acceptance
 
-<!-- The real acceptance criteria; tick each box when met. -->
+- [x] `ArggonManager/docs/plans/plan-loopo-mvp-001.md` exists with the
+      `templates/plan.md` frontmatter (`plan_id`, `title`, `spec`, `status`,
+      `created`) and the `## Tasks` / `### Tn` sections.
+- [x] Every task carries a verifiable acceptance criterion that maps to spec
+      acceptance rows; all 17 spec rows are covered exactly once (3+3+2+3+2+4).
+- [x] Ordering/gates recorded: ADR 0017 gate, terminal prerequisites for T1,
+      wave structure (parallel T3/T4 noted with merge tiebreak).
+- [x] The round-5 "same PR" testing-policy phrasing is superseded in the plan
+      (own docs PR first, one-branch-per-item) — recorded, not swapped.
+- [x] Six implementation items created under `define-loopo-mvp-scope` with
+      `depends_on` edges matching the plan (verified with `arggon list --json`).
+- [x] `arggon spec validate` passes for the plan file; `arggon validate` green.
+- [ ] Draft PR opened referencing this item id.
+- [ ] PR merged after coordinator review.
 
 ## Notes
+
+- Implementation items are created from the primary checkout so their files
+  land on `main` and are claimable immediately (the worktree-base lesson from
+  the ADR claim).
