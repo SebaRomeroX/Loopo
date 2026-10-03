@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-mvp-testing-policy
 title: "Reconcile testing policy: manual smoke vs review bar"
 assignee: SebaRomeroX
@@ -10,7 +10,6 @@ labels: [documentation]
 priority: p2
 created: "2026-10-03"
 updated: "2026-10-03"
-claimed_at: "2026-10-03T20:22:06.594Z"
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-testing-policy
 ---
 <!--
