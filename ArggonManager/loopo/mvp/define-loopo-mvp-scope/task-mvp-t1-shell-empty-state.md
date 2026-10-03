@@ -11,7 +11,6 @@ priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
 depends_on: [task-write-greenfield-exploration-and-mvp-spec, task-adr-0001-static-webapp-localstorage, task-write-mvp-plan, task-mvp-testing-policy]
-worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t1-shell-empty-state
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-mvp-t1-shell-empty-state.md
