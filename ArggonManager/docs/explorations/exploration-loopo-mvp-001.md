@@ -60,11 +60,24 @@ interview; no answer was guessed.
   import is an explicit non-goal for MVP. **Settled.**
 - Rollout → **personal first**, iterate, then open. **Settled.**
 
-**Round 4 — scope contradiction (round 1 vs round 3), terminal.**
+**Round 4 — scope contradiction (round 1 vs round 3).**
 - "Hosted service + GitHub App" vs "skip GitHub" → **MVP = static web app
   deployed to GitHub Pages; user tasks in `localStorage`; no backend, no auth.**
-  GitHub's only role is hosting the static bundle. Frontier empty: every branch
-  visited, nothing silently assumed.
+  GitHub's only role is hosting the static files.
+
+**Round 5 — user clarification before implementation (stack, UX, domain, QA).**
+- Language/tooling → **plain HTML + CSS + vanilla JavaScript, zero-build** (no
+  bundler, no `package.json`); dependencies **0 if possible**. Supersedes
+  candidate A's "TypeScript + Vite" framing — recorded, not silently swapped.
+- Domain model → users create **to-do tasks**, each choosing a **reminder kind:
+  `loop` | `date` | `counter`** — formalizes round 1's three examples into the
+  spec's type enum.
+- UX → **mobile-first** UI (new constraint; previously unrecorded).
+- Testing → **manual smoke only** in the MVP. Conflicts with the review bar in
+  `ArggonManager/docs/engineering.md` ("tests cover the behavior change") →
+  filed as `task-mvp-testing-policy` to resolve the doc in the same PR that
+  lands the first behavior change; never fork silently.
+- Round 4 + 5 terminal: frontier empty, nothing silently assumed.
 
 ## Edge cases
 
@@ -85,26 +98,29 @@ non-goal** (→ recorded here), or a **spike item** (→ a tracked task).
 | observability/debuggability      | No server, therefore no server logs | **Explicit non-goal:** no telemetry in MVP. Errors must surface in-UI (banner/console with a `?debug=1` opt-in); diagnostics are local only. |
 | security/threat model           | XSS via stored reminder text; third-party scripts on a public Pages origin | Spec AC: `textContent`-only rendering, no `innerHTML`/`eval`; no third-party runtime scripts; site served over HTTPS only (GitHub Pages default). |
 | environment/platform            | Mobile browsers throw `TypeError` on `new Notification()`; permission request must come from a user gesture; `file://` `localStorage` behavior is undefined | Spec AC: permission requested only from a click; feature-detect and prefer `ServiceWorkerRegistration.showNotification()` when `new Notification` is unavailable; supported target = HTTPS origin (GitHub Pages / localhost dev), `file://` explicitly unsupported. |
+| mobile-first UX (round 5)       | Primary target is a small viewport: thumb-reachable actions, form keyboards, no hover-only affordances, reminder-kind picker (`loop`/`date`/`counter`) cramped on narrow screens | Spec AC: single-column layout valid at 320 px width; all actions tappable without hover; the kind picker is a first-class control, not a nested menu; desktop is progressive enhancement only. |
 | upgrade/data-loss               | Deploy replaces the bundle; user clears site data | Deploy: origin-scoped storage survives (AC: migration runs on load, non-destructive — see persistence row). **Explicit non-goal:** no export/import, no backup in MVP (loss risk accepted, round 3); follow-up: Web Push item already filed for delivery, export/import stays out until requested. |
 
 ## Approaches considered
 
-Criteria (weighted): (1) honors the **no-new-runtime-deps** constraint, (2)
-fit for a 3-view app, (3) long-term maintenance risk, (4) build/deploy
-simplicity on GitHub Pages. Versions read from the npm registry on 2026-10-03.
+Criteria (weighted): (1) dependency count — **0 is the target** (round 5), (2)
+fit for a mobile-first, 3-task-type app, (3) long-term maintenance risk,
+(4) build/deploy simplicity on GitHub Pages. Versions read from the npm
+registry on 2026-10-03.
 
-### A — Vanilla TypeScript + Vite (zero runtime deps)
-- Build/dev tool only: Vite `8.3.2` (source: https://www.npmjs.com/package/vite, accessed 2026-10-03); shipped bundle has **no runtime dependencies** — the literal reading of the round-1 constraint.
-- Views are three (list/create, counter, countdown) with trivial shared state; a framework buys little here (YAGNI).
-- Trade-off: hand-rolled DOM updates and no reactive helpers; grows painful if the view count explodes.
+### A — Zero-build vanilla HTML + CSS + ES-module JS (0 dependencies)
+- No bundler, no `package.json`, no transpiler: `index.html` + `styles.css` +
+  plain `.js` modules served as-is by GitHub Pages. **Zero dependencies** — the literal reading of the round-5 constraint.
+- Native ES modules (`<script type="module">`) give file organization without tooling; DOM updates are hand-rolled via `textContent`.
+- Trade-off: no type-checking, no reactive helpers, no minification; growth beyond a handful of views gets painful — accepted, MVP is bounded (list + create form + three reminder kinds).
 
-### B — Svelte 5 + Vite
-- Svelte `5.57.1`, MIT, 15 runtime deps (source: https://www.npmjs.com/package/svelte, accessed 2026-10-03); compiler-based, small emitted runtime, best-in-class ergonomics for reactive lists (source: https://svelte.dev/, accessed 2026-10-03).
-- Trade-off: violates the no-new-runtime-deps constraint as written; adds a framework the MVP's size does not need.
+### B — Vanilla TypeScript + Vite (zero *runtime* deps)
+- Vite `8.3.2`, dev-only (source: https://www.npmjs.com/package/vite, accessed 2026-10-03); shipped bundle has no runtime deps, but `node_modules` + a build step exist.
+- Trade-off: type safety and minification at the cost of a dependency tree — **rejected in round 5** ("0 if it's possible" applies to build tooling too).
 
-### C — Preact 11 + Vite
-- Preact `11.0.0`, MIT, **0** direct runtime deps (source: https://www.npmjs.com/package/preact, accessed 2026-10-03); React-shaped mental model, ~small bundle.
-- Trade-off: still a runtime library in the bundle; JSX toolchain adds config for a 3-view app.
+### C — Framework UI (Svelte 5 / Preact 11)
+- Svelte `5.57.1` (MIT, 15 runtime deps, source: https://www.npmjs.com/package/svelte, accessed 2026-10-03); Preact `11.0.0` (MIT, 0 direct deps, source: https://www.npmjs.com/package/preact, accessed 2026-10-03).
+- Trade-off: reactive ergonomics for lists; rejected on both the 0-dependency target and a mobile-first 3-kind form needing no framework.
 
 ### Shared findings
 - **Storage:** `localStorage` is origin-scoped (HTTP ≠ HTTPS), has no expiry, is cleared for private sessions when the last tab closes, and throws `SecurityError` when the browser blocks persistence (source: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage, modified 2026-07-28, accessed 2026-10-03). → drives the empty/error/quota/security rows above.
@@ -114,13 +130,23 @@ simplicity on GitHub Pages. Versions read from the npm registry on 2026-10-03.
 
 ## Decision
 
-**Recommendation: Approach A — vanilla TypeScript + Vite, static bundle on
-GitHub Pages, `localStorage` persistence, in-tab Notifications, no backend.**
+**Recommendation: Approach A — zero-build vanilla HTML + CSS + ES-module
+JavaScript, served as-is from GitHub Pages, `localStorage` persistence,
+in-tab Notifications, no backend, no `package.json`.**
 
-Trade-offs accepted: hand-rolled DOM state (bounded by three views); no sync or
-backup (loss risk explicitly accepted, round 3); no notifications while the tab
-is closed (Web Push filed as a post-MVP follow-up). Rejected: B and C on the
-no-new-runtime-deps constraint and MVP size.
+Domain shape (round 5): a **to-do task** carries exactly one **reminder kind** —
+`loop` (recurring, e.g. "every 2 hs" / "every month"), `date` (countdown to a
+fixed date), or `counter` (elapsed since a start instant) — each computed in
+its stored IANA zone. **UI is mobile-first** (small viewport is the primary
+target; desktop is the enhancement).
+
+Trade-offs accepted: hand-rolled DOM state (bounded by three reminder kinds);
+no type-checking/minification (0-dep target, round 5); manual smoke only instead
+of automated tests (round 5 — conflicts with `docs/engineering.md`'s review bar,
+resolved by `task-mvp-testing-policy` in the same PR as the first behavior
+change); no sync or backup (loss risk explicitly accepted, round 3); no
+notifications while the tab is closed (Web Push filed as post-MVP). Rejected: B
+(bundle tooling for a 0-dep target) and C (framework the MVP does not need).
 
 Cross-cutting (stack + persistence schema + hosting) → ADR
 `ArggonManager/docs/adr/0001-static-webapp-localstorage.md` (**Proposed**),
@@ -136,7 +162,8 @@ passes `arggon spec analyze` with no NEW findings.
 ## Self-review
 
 - Placeholder scan: no `{{}}` or TODO left; all template sections filled.
-- Consistency: rounds 1–4 recorded, both supersessions marked (hosted+GitHub →
-  static Pages; OAuth → skipped) rather than silently dropped.
-- Scope: MVP only — Web Push, export/import and auth are non-goals/follow-ups.
+- Consistency: rounds 1–5 recorded, all three supersessions marked (hosted+GitHub →
+  static Pages; OAuth → skipped; TS+Vite → zero-build) rather than silently dropped.
+- Scope: MVP only — Web Push, export/import, auth and automated tests are
+  non-goals/follow-ups.
 - Ambiguity: every edge-case cell names a resolution owner (spec AC / non-goal).
