@@ -50,9 +50,11 @@ occurrences); wave 4 is T6 (needs T3 + T5).
   value copied to `loopo.tasks.backup` for unparseable/unknown-version input,
   and quota-safe writes that never clobber the stored list on failure.
 - **Acceptance:** spec AC "`schemaVersion`; an older envelope migrates
-  forward, and an unknown/newer envelope is copied to `loopo.tasks.backup`";
-  spec AC "unparseable JSON … backs up the raw value … never crashes the load
-  path"; spec AC "save rejected by quota … stored list byte-identical".
+  forward, and an unknown/newer envelope is copied to `loopo.tasks.backup`
+  and never overwritten"; spec AC "unparseable JSON … backs up the raw value,
+  shows an error banner, and never crashes the load path" (the banner UI
+  itself lands in T6); spec AC "quota … shows a message and leaves the
+  previously stored list byte-identical" (the message UI itself lands in T6).
 
 ### T3: Task list + kind-aware create/edit form
 - Item: `task-mvp-t3-list-kind-form`.
