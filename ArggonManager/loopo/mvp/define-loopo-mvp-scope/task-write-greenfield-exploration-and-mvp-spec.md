@@ -48,3 +48,18 @@ artifacts that unlock implementation:
 - [ ] Draft PR reviewed and merged with this item id referenced.
 
 ## Notes
+
+### 2026-10-03 @SebaRomeroX
+Review verdict (arggon-reviewer, session ses_efc7dcc13ffeR4Wsbzhd78e2Lq) — relayed by the coordinator; change requests applied in b928495 and 7607d84.
+
+Recommendation: MERGE (was conditional on two coordinator-run probes; both pass):
+- `arggon spec validate --json` → ok:true, errors:[] (evidence for ticked box 4).
+- `arggon spec analyze --json` → ambiguity/consistency/decisions findings all empty (evidence for ticked box 5; ADR 0017 gate holds).
+
+Change requests applied:
+- should-fix: four exploration Resolution cells didn't match where each case landed (limits/quota bound, visibilitychange recompute, ?debug=1 opt-in, SW-notification vs in-app) — cells corrected to the spec's actual resolution (b928495).
+- the "acceptance criteria ARE the edge-case rows" claim (spec intro + this item's Context) softened to derived-from with an explicit maps-to rule (b928495).
+- nits: classification section past-tensed (b928495); round-5 testing-policy row now points at the recorded supersession (7607d84).
+- left as recorded: PR-body staleness (refresh at undraft), `status: settled` (validator accepts).
+
+Reviewer praise: six-phase protocol coverage incl. the 13th dimension; spec matches templates/spec.md; 17 verifiable ACs; honest 7/8 checklist.
