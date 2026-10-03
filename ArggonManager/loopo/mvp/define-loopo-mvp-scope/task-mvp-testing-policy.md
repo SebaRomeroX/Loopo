@@ -35,12 +35,12 @@ on this item. Supersession recorded here and in
 
 ## Acceptance
 
-- [ ] `ArggonManager/docs/engineering.md` (or an approved amendment) states
+- [x] `ArggonManager/docs/engineering.md` (or an approved amendment) states
       the Loopo MVP exception: manual smoke with expected-vs-observed evidence
       recorded on the PR, in place of automated tests, for MVP-scope items.
-- [ ] The exception's scope is explicit (frontend-only MVP items; not a
+- [x] The exception's scope is explicit (frontend-only MVP items; not a
       blanket exemption for future backend/tooling work).
-- [ ] Exploration round-5 wording superseded ("same PR as first behavior
+- [x] Exploration round-5 wording superseded ("same PR as first behavior
       change" → "own docs PR before T1") — recorded in this item and the
       plan.
 - [ ] PR merged (docs-only, smoke-exempt).
