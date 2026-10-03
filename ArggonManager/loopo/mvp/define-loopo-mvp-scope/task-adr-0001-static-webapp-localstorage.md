@@ -34,20 +34,20 @@ of record.
 
 ## Acceptance
 
-- [ ] `ArggonManager/docs/adr/0001-static-webapp-localstorage.md` exists with
+- [x] `ArggonManager/docs/adr/0001-static-webapp-localstorage.md` exists with
       the template sections: Status / Date / Deciders, Context, Decision,
       Consequences, Alternatives considered.
-- [ ] Status is `Proposed` (it becomes `Accepted` on merge, per §ADRs).
-- [ ] Grounded in `exploration-loopo-mvp-001.md` with links to the exploration
+- [x] Status is `Proposed` (it becomes `Accepted` on merge, per §ADRs).
+- [x] Grounded in `exploration-loopo-mvp-001.md` with links to the exploration
       and the spec; no decision claims that neither artifact supports.
-- [ ] All three exploration supersessions are recorded as supersessions, not
+- [x] All three exploration supersessions are recorded as supersessions, not
       silent swaps: hosted+GitHub Auth → static GitHub Pages with no accounts;
       OAuth → skipped; TypeScript + Vite → zero-build.
-- [ ] Consequences name the accepted costs (no sync/backup, no delivery while
+- [x] Consequences name the accepted costs (no sync/backup, no delivery while
       the tab is closed, no type-checking/automated tests) with their tracked
       follow-up items where they exist.
-- [ ] `arggon validate` green on the branch.
-- [ ] Draft PR opened referencing this item id.
+- [x] `arggon validate` green on the branch.
+- [x] Draft PR opened referencing this item id.
 - [ ] PR merged after coordinator review (ADR status flips to `Accepted` in
       the merge).
 
