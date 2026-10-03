@@ -31,7 +31,7 @@ A change is acceptable when it satisfies the bar above and a reviewer can answer
 ## Definition of done
 
 - [ ] Acceptance checklist in the work item body is complete.
-- [ ] Tests green locally and in CI (including lint/typecheck gates).
+- [ ] Tests green locally and in CI (including lint/typecheck gates) — for Loopo MVP-scope items, the manual-smoke exception in *Testing expectations* satisfies this line too (no lint/typecheck gates exist in the 0-dependency scope).
 - [ ] Docs updated in the same PR.
 - [ ] PR merged with the work item id referenced.
 - [ ] `arggon update <id> --status done` (never reopen afterwards).
