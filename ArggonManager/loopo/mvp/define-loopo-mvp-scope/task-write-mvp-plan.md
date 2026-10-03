@@ -1,13 +1,17 @@
 ---
 type: task
-status: todo
+status: in_progress
 id: task-write-mvp-plan
 title: Write the Loopo MVP implementation plan
+assignee: SebaRomeroX
+branch: feat/task-write-mvp-plan
 parent: define-loopo-mvp-scope
 labels: [documentation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
+claimed_at: "2026-10-03T20:07:54.122Z"
+worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-write-mvp-plan
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-write-mvp-plan.md
