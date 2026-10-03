@@ -44,7 +44,8 @@ whose `depends_on` edges encode the ordering.
 - [x] Six implementation items created under `define-loopo-mvp-scope` with
       `depends_on` edges matching the plan (verified with `arggon list --json`).
 - [x] `arggon spec validate` passes for the plan file; `arggon validate` green.
-- [ ] Draft PR opened referencing this item id.
+- [x] Draft PR opened referencing this item id: **#4**
+      (`feat/task-write-mvp-plan`).
 - [ ] PR merged after coordinator review.
 
 ## Notes
@@ -52,3 +53,8 @@ whose `depends_on` edges encode the ordering.
 - Implementation items are created from the primary checkout so their files
   land on `main` and are claimable immediately (the worktree-base lesson from
   the ADR claim).
+- `spec validate` was run with the spec file materialized from PR #1's
+  branch; on the plan branch alone it reports `PLAN_SPEC_NOT_FOUND` (pure
+  file-existence check, clears when PR #1 merges). CI does not run
+  `spec validate` — it runs `arggon validate`, which is green.
+- Merge order: `#3 → #1 → #2 → #4`.
