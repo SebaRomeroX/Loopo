@@ -14,7 +14,7 @@ stored IANA zone. The scope was settled by the greenfield exploration
 the edge-case rows of that exploration are the acceptance criteria of the spec
 [`spec-loopo-mvp-001.md`](../specs/spec-loopo-mvp-001.md).
 
-The binding constraints, all recorded in exploration round 5:
+The binding constraints, recorded in exploration rounds 3–5:
 
 - **Zero dependencies, including tooling.** "0 if it's possible" applies to
   build tooling too: no `package.json`, no bundler, no install step.
@@ -25,7 +25,7 @@ The binding constraints, all recorded in exploration round 5:
   is deferred (tracked as
   `task-deliver-reminders-while-the-tab-is-closed-web-push`, label `post-mvp`).
 - **Manual smoke testing only** for the MVP (see `task-mvp-testing-policy`,
-  which resolves the conflict with the review bar in
+  which tracks the resolution of the conflict with the review bar in
   `ArggonManager/docs/engineering.md`).
 
 This ADR records the cross-cutting stack decision (stack + persistence +
@@ -73,9 +73,11 @@ acceptance criteria stay in the spec; they are deliberately not restated here.
   commitment of this ADR.
 - No reminder delivery while the tab is closed — the reason Web Push is filed
   as a post-MVP item rather than cut silently.
-- `localStorage` limits apply: synchronous single-tab API, browser-dependent
+- `localStorage` limits apply: synchronous API shared across tabs (two-tab
+  changes converge via the `storage` event, last-write-wins), browser-dependent
   quota, `SecurityError` when storage is blocked, origin scoping (HTTP ≠
-  HTTPS). Each has a specified empty/error path in the spec's edge-case table.
+  HTTPS). Each has a specified empty/error path in the exploration's
+  edge-case table, as adopted by the spec's acceptance criteria.
 - No type-checking and no automated test harness in the MVP; correctness rests
   on the spec's acceptance criteria plus the manual smoke gate, which is why
   the spec's edge-case rows are written as checkbox acceptance items.
