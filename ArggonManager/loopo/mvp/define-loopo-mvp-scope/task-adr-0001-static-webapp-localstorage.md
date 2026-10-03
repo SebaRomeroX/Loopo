@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-adr-0001-static-webapp-localstorage
 title: "Record ADR 0001: static webapp + localStorage for the Loopo MVP"
 assignee: SebaRomeroX
@@ -10,7 +10,6 @@ labels: [documentation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-03"
-claimed_at: "2026-10-03T18:52:13.243Z"
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-adr-0001-static-webapp-localstorage
 ---
 <!--
