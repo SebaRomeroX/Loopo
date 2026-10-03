@@ -26,8 +26,13 @@ TODO: end-to-end walkthrough of one representative operation.
 
 ```text
 Loopo/
-  ArggonManager/  # tracker root: work items + product docs (ArggonManager/docs/)
-  src/            # TODO: purpose
+  index.html     # static shell: header, <noscript> fallback, #app mount point
+  styles.css     # mobile-first styles — base targets 320 px, only widens on larger viewports
+  js/            # app ES modules loaded directly (no build step, no dependencies):
+    main.js        # entry module: mounts the dynamic region (#app)
+    empty-state.js # first-run empty state: one example per reminder kind
+    kinds.js       # reminder-kind registry (loop/date/counter) shared by every screen
+  ArggonManager/ # tracker root: work items + product docs (ArggonManager/docs/)
 ```
 
 ## Boundaries and layering rules
