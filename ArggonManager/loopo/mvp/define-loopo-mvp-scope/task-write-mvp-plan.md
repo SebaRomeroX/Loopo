@@ -57,4 +57,10 @@ whose `depends_on` edges encode the ordering.
   branch; on the plan branch alone it reports `PLAN_SPEC_NOT_FOUND` (pure
   file-existence check, clears when PR #1 merges). CI does not run
   `spec validate` — it runs `arggon validate`, which is green.
+- PR #4's CI run is red on the **drift gate**, for the same pre-#3-merge
+  reason as PRs #1/#2: the merge ref still carries the un-pinned workflow, so
+  the runner regenerates the seam with registry `arggon-manager@0.5.0`
+  (differs from the committed git-main seam: `.agents/skills/*`, `AGENTS.md`,
+  plus runner-created `CLAUDE.md`/`.mcp.json`). Re-run after PR #3 merges —
+  then the pinned git-SHA generator matches the committed seam.
 - Merge order: `#3 → #1 → #2 → #4`.
