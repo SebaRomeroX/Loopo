@@ -10,7 +10,7 @@ Operating principle: **code is cheap; good practices and sound software architec
 A PR is reviewable when:
 
 - [ ] It does one thing (small, focused diff).
-- [ ] Tests cover the behavior change (new tests for new behavior, updated tests for changed behavior).
+- [ ] Tests cover the behavior change (new tests for new behavior, updated tests for changed behavior) — for Loopo MVP-scope items, the manual-smoke exception in *Testing expectations* applies.
 - [ ] Docs affected by the change are updated **in the same PR** (README, `ArggonManager/docs/`, ADRs).
 - [ ] The work item id from the tracker (`ArggonManager/`) is referenced in the PR.
 - [ ] `arggon validate` passes (if the change touches `ArggonManager/` or templates).
@@ -26,12 +26,12 @@ A change is acceptable when it satisfies the bar above and a reviewer can answer
 - Scalability: payloads stay bounded; complexity is declared wherever inputs grow with the data (an O(n²) scan must justify its input ceiling); no unbounded reads or renders.
 - Security: untrusted content is parsed defensively; subprocess arguments are arrays, never shell-interpolated; nothing writes outside the repo root; secrets are never committed or logged; new runtime dependencies are justified in the PR.
 
-**Smoke gate (blocks merge):** a change is executed end-to-end before approval, not just unit-tested. CLI behavior changes: probe the changed commands on a fixture and record expected-vs-observed evidence in the review verdict. UI changes: smoke in a real browser (e.g. Playwright CLI) — it renders, matches the data, and one state change round-trips and persists. Docs-only changes are exempt.
+**Smoke gate (blocks merge):** a change is executed end-to-end before approval, not just unit-tested. CLI behavior changes: probe the changed commands on a fixture and record expected-vs-observed evidence in the review verdict. UI changes: smoke in a real browser (e.g. Playwright CLI) — it renders, matches the data, and one state change round-trips and persists. Docs-only changes are exempt. Loopo MVP items smoke manually in a real browser at a mobile viewport (no tooling dependencies — see *Testing expectations*).
 
 ## Definition of done
 
 - [ ] Acceptance checklist in the work item body is complete.
-- [ ] Tests green locally and in CI (including lint/typecheck gates).
+- [ ] Tests green locally and in CI (including lint/typecheck gates) — for Loopo MVP-scope items, the manual-smoke exception in *Testing expectations* satisfies this line too (no lint/typecheck gates exist in the 0-dependency scope).
 - [ ] Docs updated in the same PR.
 - [ ] PR merged with the work item id referenced.
 - [ ] `arggon update <id> --status done` (never reopen afterwards).
@@ -40,8 +40,26 @@ A change is acceptable when it satisfies the bar above and a reviewer can answer
 
 <!-- Project-specific: coverage expectations, what needs integration vs unit tests, fixtures policy. -->
 
-- TODO: unit vs integration split.
-- TODO: what must be covered before merge.
+- **Default:** behavior changes ship with automated tests covering the change
+  (the unit-vs-integration split is set by the first backend/tooling change
+  that needs it); CI gates green before review. The smoke gate above still
+  applies on top.
+- **Loopo MVP exception (frontend-only, 0-dependency scope):** the MVP app
+  ships with **no test harness** — adding one would break the zero-dependency,
+  no-build invariant (ADR 0001, spec `loopo-mvp-001`). For MVP-scope items
+  the review bar's "tests cover the behavior change" item and any automated
+  test gate are satisfied by a **manual smoke pass**: every touched acceptance
+  path executed in a real browser at a mobile viewport, with
+  **expected-vs-observed evidence recorded on the PR** (PR description or
+  review verdict).
+  - **Scope:** applies only to frontend-only Loopo MVP items (plain
+    HTML/CSS/ES-module app on GitHub Pages). Not a blanket exemption — any
+    future backend, sync, build-tooling, or dependency-introducing change
+    falls back to the default bar above.
+  - Tracked as `task-mvp-testing-policy`. Supersedes exploration round 5's
+    "resolved in the same PR as the first behavior change": one branch per
+    item makes that impossible, so this docs PR lands before the first
+    behavior PR (`task-mvp-t1-shell-empty-state` depends on this item).
 
 ## ADRs
 
