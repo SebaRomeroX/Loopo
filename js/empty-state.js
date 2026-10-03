@@ -50,6 +50,8 @@ function detailFor(example) {
       return dateDetail(example.targetDate);
     case "counter":
       return counterDetail(example.startedAt, example.zone);
+    default:
+      throw new Error(`unknown reminder kind: ${example.kind}`);
   }
 }
 
