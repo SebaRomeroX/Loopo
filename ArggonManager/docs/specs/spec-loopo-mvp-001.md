@@ -9,8 +9,10 @@ created: 2026-10-03
 
 This spec is the ADR 0017 gate for the Loopo MVP: no implementation task may
 be claimed before `arggon spec analyze` reports no NEW findings against it. Its
-acceptance criteria are the edge-case rows hunted in
-`ArggonManager/docs/explorations/exploration-loopo-mvp-001.md`; the
+acceptance criteria are derived from the edge-case rows hunted in
+`ArggonManager/docs/explorations/exploration-loopo-mvp-001.md` — each row maps
+to an acceptance row below, to a Synopsis invariant, or is explicitly
+superseded (the exploration's Resolution column records which); the
 cross-cutting stack decision is `ArggonManager/docs/adr/0001-static-webapp-localstorage.md`.
 
 ## Purpose

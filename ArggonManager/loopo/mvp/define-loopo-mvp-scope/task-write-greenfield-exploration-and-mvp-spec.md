@@ -30,7 +30,8 @@ artifacts that unlock implementation:
 1. Exploration: `ArggonManager/docs/explorations/exploration-loopo-mvp-001.md`
    (six-phase protocol, rounds 1–5, edge-case hunt).
 2. Spec: `ArggonManager/docs/specs/spec-loopo-mvp-001.md` — its acceptance
-   criteria are the exploration's edge-case rows.
+   criteria are derived from the exploration's edge-case rows (each row maps
+   to an acceptance row, a Synopsis invariant, or an explicit supersession).
 
 ## Acceptance
 
