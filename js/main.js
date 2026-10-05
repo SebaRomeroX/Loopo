@@ -12,7 +12,7 @@
  * `js/notify.js`). The permission control lives in the page header and
  * requests only from its button (user gesture).
  */
-import { loadTasks, saveTasks, STORAGE_KEY } from "./store.js";
+import { loadTasks, saveTasks, STORAGE_KEY, SCHEMA_VERSION } from "./store.js";
 import { KINDS } from "./kinds.js";
 import { renderEmptyState } from "./empty-state.js";
 import { renderList } from "./list.js";
@@ -36,9 +36,8 @@ const form = createForm(document, { onSubmit: commit });
 const noticesSlot = document.createElement("div");
 noticesSlot.className = "notices";
 const listSlot = document.createElement("div");
-document.querySelector(".app-header").appendChild(
-  createPermissionRow(document, window).element
-);
+const permissionRow = createPermissionRow(document, window);
+document.querySelector(".app-header").appendChild(permissionRow.element);
 app.appendChild(form.element);
 app.appendChild(noticesSlot);
 app.appendChild(listSlot);
@@ -128,6 +127,9 @@ function runEngine({ persistChanges = true } = {}) {
 
 function refresh() {
   runEngine();
+  // The permission can change outside the app (browser settings) — re-read
+  // it on every pass so the header row never shows a stale control.
+  permissionRow.refresh();
   render();
 }
 
@@ -178,13 +180,19 @@ window.addEventListener("focus", refresh);
 
 // Cross-tab notification dedupe (spec row 15): when another tab shows an
 // occurrence it persists `lastNotifiedAt`, and this tab copies the anchor so
-// it never shows the same occurrence again. Only the anchor travels here —
-// full last-write-wins task convergence is T6.
+// it never shows the same occurrence again — best-effort: it closes the
+// reload/late-tick duplicates, while a simultaneous-tick race stays open
+// until T6's full convergence takes over this listener. Envelope guards
+// here (schemaVersion, shape), anchor type guard in `syncLastNotified`.
 window.addEventListener("storage", (event) => {
   if (event.key !== STORAGE_KEY || typeof event.newValue !== "string") return;
   try {
     const parsed = JSON.parse(event.newValue);
-    if (parsed && Array.isArray(parsed.tasks)) {
+    if (
+      parsed &&
+      parsed.schemaVersion === SCHEMA_VERSION &&
+      Array.isArray(parsed.tasks)
+    ) {
       syncLastNotified(tasks, parsed.tasks);
     }
   } catch {

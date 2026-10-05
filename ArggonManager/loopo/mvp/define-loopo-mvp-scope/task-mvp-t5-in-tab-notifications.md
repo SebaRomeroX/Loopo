@@ -110,8 +110,40 @@ elapsed while the tab was closed.
     the newest 8; `missed` marker = red chip + red card border in-app,
     `Missed —` body prefix + unique OS `tag` for the system path (never
     color-only).
-- For T6: the `storage` listener in `js/main.js` is anchor-only dedupe —
-  fold it into your full convergence handler. Banner candidates: the
-  engine `warnOnce` sites plus the notice-failure warning (ids only —
-  map id → title for display). `document.hidden` gating of the 30 s
-  interval remains open (spec Synopsis wording).
+- Review round 1 (independent `arggon-reviewer` on PR #10 → **approve**,
+  non-blocking follow-ups): **SF-1** applied — the `storage` listener now
+  checks `schemaVersion === SCHEMA_VERSION` before copying, and
+  `syncLastNotified` rejects untyped anchors (only `null`/string accepted),
+  so a cross-version or hand-edited envelope can never poison the dedupe
+  equality. Nits applied: **N2** `refresh()` re-reads
+  `Notification.permission` (browser settings can change while open — the
+  row was stale on every timer pass); **N3** the listener comment no longer
+  overclaims ("best-effort — the simultaneous-tick window stays open until
+  T6"); **N4** the anchor write sits inside the per-occurrence `try` (a
+  throw there can no longer leave an unguarded `changed = true`); **N5** a
+  corrupt `taskDetail` no longer swallows the whole notice — kind + title
+  render, only the detail falls back (warn: `no detail for "<id>"`); **N6**
+  the id lookup's ceiling is stated (single-envelope task lists — a Map
+  would be speculative). **N7 recorded with rationale, not applied**:
+  callback-era Safari (< 16, 2022) ignores the promise return of
+  `requestPermission()`, so the button would not refresh until the next
+  timer pass — Loopo targets evergreen browsers (spec: HTTPS/localhost
+  only, no legacy support claims) and a dead callback parameter would be
+  speculative code. Smoke extended for SF-1 (garbage anchors ignored,
+  explicit null accepted) and N5 (corrupt payload keeps its title).
+  The reviewer independently re-verified rows 14 + 15 in Chromium (gesture
+  count, dedupe across reload, both markers, XSS) — matched the worker's
+  evidence; no blockers found.
+- For T6: the `storage` listener in `js/main.js` is anchor-only dedupe with
+  its `schemaVersion`/shape guards — fold it (listener + guards) into your
+  full convergence handler rather than extending it. Banner candidates now:
+  `forDisplay` skips, `runEngine`/`persist` save/load failures, the
+  `storage` listener's silent catches, `consumeOccurrences`/
+  `presentInApp` warnings, and the `refresh()` listener setup — all carry
+  ids only, so map id → title for display (warn sites deliberately keep
+  titles out of the console). The in-app notices slot can outlive a task
+  deleted from another tab (T4 badges vanish via convergence, a notice
+  may not) — purge `.notice` entries whose id disappears when your
+  convergence lands. Permission-row refresh rides on `refresh()` already.
+  `document.hidden` gating of the 30 s interval remains open (spec
+  Synopsis wording, no acceptance row).
