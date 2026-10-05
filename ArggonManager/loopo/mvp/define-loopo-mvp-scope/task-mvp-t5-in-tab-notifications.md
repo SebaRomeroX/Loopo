@@ -11,7 +11,6 @@ priority: p1
 created: "2026-10-03"
 updated: "2026-10-05"
 depends_on: [task-mvp-t4-reminder-engine]
-worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t5-in-tab-notifications
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-mvp-t5-in-tab-notifications.md
