@@ -58,9 +58,12 @@ function backUp(storage, raw) {
  * @returns {{ tasks: Array<object>, failure: null | { type: string, message: string } }}
  *   failure.type: "unparseable" | "unknown-version" | "unavailable"
  */
-export function loadTasks(storage = defaultStorage()) {
+export function loadTasks(storage) {
   let raw;
   try {
+    // Resolved inside the try: with blocked storage the *getter* itself
+    // throws SecurityError, which must surface as `unavailable`, not escape.
+    storage = storage ?? defaultStorage();
     raw = storage.getItem(STORAGE_KEY);
   } catch {
     return {
@@ -85,7 +88,7 @@ export function loadTasks(storage = defaultStorage()) {
       tasks: [],
       failure: {
         type: "unparseable",
-        message: "Stored reminders could not be read — a backup was kept.",
+        message: "Stored reminders could not be read — the stored value is left untouched; a backup copy is kept when possible.",
       },
     };
   }
@@ -104,7 +107,7 @@ export function loadTasks(storage = defaultStorage()) {
       failure: {
         type: "unknown-version",
         message:
-          "Stored reminders come from a newer version of Loopo — a backup was kept.",
+          "Stored reminders come from a newer version of Loopo — the stored value is left untouched; a backup copy is kept when possible.",
       },
     };
   }
@@ -121,7 +124,7 @@ export function loadTasks(storage = defaultStorage()) {
       tasks: [],
       failure: {
         type: "unparseable",
-        message: "Stored reminders could not be read — a backup was kept.",
+        message: "Stored reminders could not be read — the stored value is left untouched; a backup copy is kept when possible.",
       },
     };
   }
@@ -135,7 +138,7 @@ export function loadTasks(storage = defaultStorage()) {
         tasks: [],
         failure: {
           type: "unparseable",
-          message: "Stored reminders could not be read — a backup was kept.",
+          message: "Stored reminders could not be read — the stored value is left untouched; a backup copy is kept when possible.",
         },
       };
     }
@@ -158,7 +161,7 @@ export function loadTasks(storage = defaultStorage()) {
  * @returns {{ ok: boolean, error: null | { type: string, message: string } }}
  *   error.type: "quota" | "unavailable" | "invalid-tasks"
  */
-export function saveTasks(tasks, storage = defaultStorage()) {
+export function saveTasks(tasks, storage) {
   if (!Array.isArray(tasks)) {
     return {
       ok: false,
@@ -166,9 +169,12 @@ export function saveTasks(tasks, storage = defaultStorage()) {
     };
   }
 
+  // Programmer errors (cyclic/BigInt payloads) surface loudly here;
+  // storage failures are classified inside the try.
   const payload = JSON.stringify({ schemaVersion: SCHEMA_VERSION, tasks });
 
   try {
+    storage = storage ?? defaultStorage();
     storage.setItem(STORAGE_KEY, payload);
     return { ok: true, error: null };
   } catch (cause) {

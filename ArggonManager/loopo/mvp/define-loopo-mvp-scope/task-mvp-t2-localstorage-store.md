@@ -65,3 +65,20 @@ invariant 1 ("stored tasks are never destroyed on read") is implemented here.
   `QuotaExceededError` → `{ok:false,type:"quota"}` and stored list
   byte-identical; T1 empty state still renders ("No reminders yet"),
   console zero entries.
+- Review round (arggon-reviewer, session ses_ef62d0e71ffewGxPWU01bFki35):
+  **blocker** — `defaultStorage()` was evaluated in the default-parameter
+  position, before every `try`, so with blocked storage the `localStorage`
+  *getter* (SecurityError) escaped `loadTasks`/`saveTasks`, falsifying the
+  module's "never throws" contract. Fixed: storage is resolved inside the
+  first `try` of both functions. Regression covered by Node smoke case 13
+  and an in-browser probe: a throwing getter now yields
+  `{tasks:[],failure:{type:"unavailable"}}` /
+  `{ok:false,error:{type:"unavailable"}}`, page intact, console clean.
+  **should-fix** — `ARCHITECTURE.md` code map now lists `tasks.js` +
+  `store.js`. **nit** — failure messages no longer claim a backup that may
+  have been skipped ("the stored value is left untouched; a backup copy is
+  kept when possible"). **design note for T6** (reviewer nit): when the
+  backup slot is already occupied, a later failure's raw value lives only in
+  the primary key and a subsequent successful save would overwrite it — the
+  T6 banner/save flow should warn or block saves after `unknown-version`.
+  Full browser smoke re-run on the fixed code: every path green.
