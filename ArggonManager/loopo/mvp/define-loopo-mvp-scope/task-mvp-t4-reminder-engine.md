@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-mvp-t4-reminder-engine
 title: "MVP T4: reminder engine - zone-correct loop/date/counter"
 assignee: SebaRomeroX
@@ -10,7 +10,6 @@ labels: [implementation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-05"
-claimed_at: "2026-10-05T03:31:15.499Z"
 depends_on: [task-mvp-t2-localstorage-store]
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t4-reminder-engine
 ---
