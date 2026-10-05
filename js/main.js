@@ -1,14 +1,15 @@
 /**
- * Entry module: wires the T2 store to the T3 UI — the add/edit form above the
- * list (or the first-run empty state when no task exists). Every change goes
- * through `saveTasks`; load/save failures are reported on the console until
- * T6 lands the banner/message UI.
+ * Entry module: wires the T2 store to the UI — banners for every failure
+ * path (T6), the add/edit form above the list (or the first-run empty
+ * state), session-local read-only mode when storage is blocked, and
+ * last-write-wins convergence between tabs. Every change goes through
+ * `saveTasks`.
  *
  * The reminder engine (T4) runs on load, on a 30 s timer while the page is
  * open, on `visibilitychange` (back to visible) and on `focus` (spec
  * Synopsis): it initializes/advances loop `nextAt` (persisting only when it
  * actually advanced) and collects occurrences — the stream T5's in-tab
- * notifications consume right here in `runEngine()` (dedupe + present via
+ * notifications consume in `runEngine()` (dedupe + present via
  * `js/notify.js`). The permission control lives in the page header and
  * requests only from its button (user gesture).
  */
@@ -18,19 +19,26 @@ import { renderEmptyState } from "./empty-state.js";
 import { renderList } from "./list.js";
 import { createForm } from "./form.js";
 import { tick } from "./engine.js";
+import { createBanners } from "./banners.js";
 import {
   consumeOccurrences,
   createPermissionRow,
-  syncLastNotified,
+  sanitizeAnchors,
 } from "./notify.js";
 
 const app = document.getElementById("app");
 
+// Banners first: a failure that made it to the user must speak above
+// everything else in the content area.
+const banners = createBanners(document);
+app.appendChild(banners.element);
+
 const loaded = loadTasks();
-if (loaded.failure) {
-  console.warn(`Loopo: ${loaded.failure.message}`);
-}
 let tasks = loaded.tasks;
+/** Storage blocked → session-local read-only (spec's storage-blocked row). */
+let readOnly = false;
+/** Unknown/newer envelope → saves must never overwrite it (spec row 7). */
+let futureGuard = false;
 
 const form = createForm(document, { onSubmit: commit });
 const noticesSlot = document.createElement("div");
@@ -41,6 +49,39 @@ document.querySelector(".app-header").appendChild(permissionRow.element);
 app.appendChild(form.element);
 app.appendChild(noticesSlot);
 app.appendChild(listSlot);
+
+/**
+ * Enter session-local read-only mode: a banner that sticks for the session
+ * plus disabled create/edit with the explanatory message. Reached on a
+ * load-time `SecurityError` *and* on one thrown by a save — "when storage
+ * is blocked" has no timing qualifier.
+ */
+function enterReadOnly() {
+  if (readOnly) return;
+  readOnly = true;
+  form.setReadOnly(true);
+  banners.show(
+    "read-only",
+    "Browser storage is blocked — this session is read-only: create and edit are disabled and changes cannot be saved.",
+    { tone: "error", dismissable: false }
+  );
+}
+
+if (loaded.failure) {
+  console.warn(`Loopo: ${loaded.failure.message}`);
+  if (loaded.failure.type === "unavailable") {
+    enterReadOnly();
+  } else {
+    banners.show(`load:${loaded.failure.type}`, loaded.failure.message, {
+      tone: "error",
+    });
+    if (loaded.failure.type === "unknown-version") {
+      // T2's deferred handoff: this session must not write over the
+      // newer envelope — `persist()` enforces it on every save attempt.
+      futureGuard = true;
+    }
+  }
+}
 
 const warnedUnrenderable = new Set();
 
@@ -85,24 +126,97 @@ function renderProblem(task) {
 }
 
 function forDisplay(list) {
-  return list.filter((task) => {
+  const displayable = [];
+  const skipped = [];
+  for (const task of list) {
     const problem = renderProblem(task);
-    if (problem === null) return true;
-    if (!warnedUnrenderable.has(task)) {
-      warnedUnrenderable.add(task);
+    if (problem === null) {
+      displayable.push(task);
+      continue;
+    }
+    // Key on the id, not the object: adoption re-parses tasks, so identity
+    // keys would re-warn (and leak detached objects into the Set) on every
+    // storage event (review N4).
+    const idKey =
+      task && typeof task.id === "string" ? task.id : "unknown";
+    if (!warnedUnrenderable.has(idKey)) {
+      warnedUnrenderable.add(idKey);
       console.warn(
         `Loopo: skipping a stored task — ${problem} (id ${task?.id ?? "unknown"}).`
       );
     }
-    return false;
+    skipped.push(task);
+  }
+  updateSkipBanner(skipped);
+  return displayable;
+}
+
+/**
+ * Surface hidden (invalid) tasks as one warn banner: titles via
+ * `textContent`, capped so a badly broken envelope cannot flood the view.
+ * Dismissal is final for the session — a re-render must not nag.
+ */
+function updateSkipBanner(skipped) {
+  if (skipped.length === 0) {
+    banners.dismiss("skips");
+    return;
+  }
+  const labels = skipped.slice(0, 3).map((task) => {
+    const title =
+      task && typeof task.title === "string" && task.title !== ""
+        ? task.title
+        : null;
+    return title === null ? `id ${task?.id ?? "unknown"}` : `"${title}"`;
   });
+  const more =
+    skipped.length > labels.length ? ` +${skipped.length - labels.length} more` : "";
+  banners.show(
+    "skips",
+    `${skipped.length} reminder${skipped.length === 1 ? "" : "s"} cannot be ` +
+      `displayed (invalid stored data): ${labels.join(", ")}${more}. ` +
+      `The stored value is left untouched.`,
+    { tone: "warn" }
+  );
 }
 
 function persist() {
-  const saved = saveTasks(tasks);
-  if (!saved.ok) {
-    console.warn(`Loopo: ${saved.error.message}`);
+  if (readOnly) {
+    // Blocked storage: every write would fail with the message the
+    // persistent read-only banner already carries — no per-write nag.
+    return;
   }
+  if (futureGuard) {
+    // Spec row 7: an unknown/newer envelope is never overwritten — not by
+    // the load path and not by a later save either. In-memory changes
+    // stay on screen for this session; the refusal says so (persistent —
+    // a dismissed refusal must not turn silent on the next attempt).
+    banners.show(
+      "future-guard",
+      "Not saving — the stored reminders come from a newer version of Loopo and must not be overwritten. Changes stay on screen for this session only.",
+      { tone: "error", dismissable: false }
+    );
+    return;
+  }
+  const saved = saveTasks(tasks);
+  if (saved.ok) {
+    banners.dismiss("save:quota");
+    // save:invalid-tasks is a programmer error (unreachable today), but a
+    // later success proves writes work again — clear it too.
+    banners.dismiss("save:invalid-tasks");
+    return;
+  }
+  console.warn(`Loopo: ${saved.error.message}`);
+  if (saved.error.type === "unavailable") {
+    // Storage blocked mid-session (spec: "when storage is blocked") —
+    // flip to session-local read-only instead of nagging on every write.
+    enterReadOnly();
+    return;
+  }
+  // A save that fails *again* must speak again after a dismissal (quota).
+  banners.show(`save:${saved.error.type}`, saved.error.message, {
+    tone: "error",
+    reshow: true,
+  });
 }
 
 /**
@@ -146,16 +260,33 @@ function commit(task) {
   render();
 }
 
+/**
+ * Drop one-shot notices whose task no longer exists (deleted here, or
+ * adopted away by a `storage` event) — badges vanish with the task, so a
+ * notice must not outlive it (T5 handoff).
+ */
+function purgeNotices() {
+  const known = new Set(tasks.map((task) => task && task.id));
+  for (const notice of noticesSlot.querySelectorAll(".notice")) {
+    const id = notice.getAttribute("data-task-id");
+    if (id !== null && !known.has(id)) notice.remove();
+  }
+}
+
 function render() {
+  purgeNotices();
   const displayable = forDisplay(tasks);
   listSlot.replaceChildren(
     displayable.length > 0
       ? renderList(document, displayable, {
+          readOnly,
           onEdit(id) {
+            if (readOnly) return; // belt: the buttons are disabled
             const task = tasks.find((candidate) => candidate.id === id);
             if (task) form.edit(task);
           },
           onDelete(id) {
+            if (readOnly) return; // belt: the buttons are disabled
             tasks = tasks.filter((candidate) => candidate.id !== id);
             // Deleting the task being edited must not leave a form whose
             // "Save changes" would resurrect it (review SF-1).
@@ -178,24 +309,62 @@ document.addEventListener("visibilitychange", () => {
 });
 window.addEventListener("focus", refresh);
 
-// Cross-tab notification dedupe (spec row 15): when another tab shows an
-// occurrence it persists `lastNotifiedAt`, and this tab copies the anchor so
-// it never shows the same occurrence again — best-effort: it closes the
-// reload/late-tick duplicates, while a simultaneous-tick race stays open
-// until T6's full convergence takes over this listener. Envelope guards
-// here (schemaVersion, shape), anchor type guard in `syncLastNotified`.
+// Last-write-wins convergence (spec row 120): the event carries the value
+// that WON storage, so this tab adopts it wholesale — tasks, schedule state
+// and notification anchors together (subsumes T5's anchor-only sync; the
+// guards travel: envelope schemaVersion/shape here, anchor types in
+// `sanitizeAnchors`). An unreadable or foreign-version update is ignored —
+// never adopt data we cannot trust — and says so in a banner. A removed or
+// cleared key (newValue null; `clear()` reports key null) converges to an
+// empty list: that write won too.
 window.addEventListener("storage", (event) => {
-  if (event.key !== STORAGE_KEY || typeof event.newValue !== "string") return;
-  try {
-    const parsed = JSON.parse(event.newValue);
-    if (
-      parsed &&
-      parsed.schemaVersion === SCHEMA_VERSION &&
-      Array.isArray(parsed.tasks)
-    ) {
-      syncLastNotified(tasks, parsed.tasks);
+  if (event.key !== STORAGE_KEY && event.key !== null) return;
+  const adopted = () => {
+    banners.show(
+      "adopt-ignored",
+      "Another tab stored a value this app could not read — it was ignored here.",
+      { tone: "warn" }
+    );
+  };
+  let next;
+  if (event.newValue === null) {
+    next = [];
+  } else {
+    try {
+      const parsed = JSON.parse(event.newValue);
+      if (
+        !(
+          parsed &&
+          parsed.schemaVersion === SCHEMA_VERSION &&
+          Array.isArray(parsed.tasks)
+        )
+      ) {
+        console.warn("Loopo: ignoring a storage update with an unknown shape.");
+        adopted();
+        return;
+      }
+      next = parsed.tasks;
+    } catch {
+      console.warn("Loopo: ignoring an unreadable storage update.");
+      adopted();
+      return;
     }
-  } catch {
-    // Corrupt remote value: T6 shows the banner; the dedupe sync skips it.
   }
+
+  const previousIds = new Set(tasks.map((task) => task && task.id));
+  tasks = next;
+  sanitizeAnchors(tasks);
+  for (const task of tasks) {
+    if (task && typeof task === "object") {
+      // An open edit keeps the adopted dedupe anchor, so saving after
+      // another tab's notification cannot resurrect a stale one.
+      form.syncAnchor(task.id, task);
+    }
+  }
+  for (const id of previousIds) {
+    if (id !== null && !tasks.some((task) => task && task.id === id)) {
+      form.resetIfEditing(id); // the task being edited just disappeared
+    }
+  }
+  refresh(); // engine + permission row + render (purges stale notices)
 });

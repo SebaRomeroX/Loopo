@@ -16,7 +16,7 @@ function actionButton(doc, { text, ariaLabel, className, onClick }) {
   return button;
 }
 
-function taskElement(doc, task, { onEdit, onDelete }) {
+function taskElement(doc, task, { onEdit, onDelete, readOnly }) {
   const status = taskStatus(task, Date.now());
 
   const item = doc.createElement("li");
@@ -49,29 +49,33 @@ function taskElement(doc, task, { onEdit, onDelete }) {
 
   const actions = doc.createElement("div");
   actions.className = "task__actions";
-  actions.appendChild(
-    actionButton(doc, {
-      text: "Edit",
-      ariaLabel: `Edit ${task.title}`,
-      className: "btn btn--ghost",
-      onClick: () => onEdit(task.id),
-    })
-  );
-  actions.appendChild(
-    actionButton(doc, {
-      text: "Delete",
-      ariaLabel: `Delete ${task.title}`,
-      className: "btn btn--ghost btn--danger",
-      onClick: () => onDelete(task.id),
-    })
-  );
+  const editButton = actionButton(doc, {
+    text: "Edit",
+    ariaLabel: `Edit ${task.title}`,
+    className: "btn btn--ghost",
+    onClick: () => onEdit(task.id),
+  });
+  const deleteButton = actionButton(doc, {
+    text: "Delete",
+    ariaLabel: `Delete ${task.title}`,
+    className: "btn btn--ghost btn--danger",
+    onClick: () => onDelete(task.id),
+  });
+  if (readOnly) {
+    // Blocked-storage session (T6): nothing can persist, so the row actions
+    // are disabled rather than pretending to work.
+    editButton.disabled = true;
+    deleteButton.disabled = true;
+  }
+  actions.appendChild(editButton);
+  actions.appendChild(deleteButton);
 
   item.appendChild(body);
   item.appendChild(actions);
   return item;
 }
 
-export function renderList(doc, tasks, { onEdit, onDelete }) {
+export function renderList(doc, tasks, { onEdit, onDelete, readOnly = false }) {
   const section = doc.createElement("section");
   section.className = "task-list";
   section.setAttribute("aria-labelledby", "task-list-title");
@@ -84,7 +88,7 @@ export function renderList(doc, tasks, { onEdit, onDelete }) {
   const list = doc.createElement("ul");
   list.className = "tasks";
   for (const task of tasks) {
-    list.appendChild(taskElement(doc, task, { onEdit, onDelete }));
+    list.appendChild(taskElement(doc, task, { onEdit, onDelete, readOnly }));
   }
 
   section.appendChild(heading);

@@ -99,6 +99,8 @@ function presentSystem(win, task, occurrence) {
 function presentInApp(doc, notices, task, occurrence) {
   const notice = doc.createElement("div");
   notice.className = occurrence.missed ? "notice notice--missed" : "notice";
+  // Lets T6's render purge drop notices whose task no longer exists.
+  notice.setAttribute("data-task-id", task.id);
 
   const body = doc.createElement("div");
   body.className = "notice__body";
@@ -180,24 +182,23 @@ export function consumeOccurrences({ doc, win, tasks, occurrences, notices }) {
 }
 
 /**
- * Narrow cross-tab dedupe: copy the other tab's persisted `lastNotifiedAt`
- * anchors onto the in-memory tasks so this tab does not re-show an
- * occurrence the other tab already showed (best-effort — the simultaneous-
- * tick window stays open until T6's full convergence). Only the anchor
- * travels here; the envelope's `schemaVersion` is checked by the caller and
- * the anchor's type here, so a cross-version or hand-edited value can never
- * poison the dedupe equality.
- * `tasks` come from a single localStorage envelope — small by construction,
- * so the id lookup stays a linear scan (a Map would be speculative).
+ * Normalize notification anchors after adopting another tab's envelope
+ * (T6's last-write-wins convergence carries the whole task list, anchors
+ * included). A hand-edited or cross-version value must not poison the
+ * dedupe equality (`task.lastNotifiedAt === occurrence.at`), so anything
+ * that is neither `null` nor a string is dropped to `null` on arrival —
+ * "not yet notified", the safe side. A missing field is left untouched
+ * (it already reads as never-notified). Single envelope, in place.
  */
-export function syncLastNotified(tasks, incoming) {
-  for (const candidate of incoming) {
-    if (!candidate || typeof candidate.id !== "string") continue;
-    const anchor = candidate.lastNotifiedAt;
-    if (anchor !== null && typeof anchor !== "string") continue; // untyped garbage
-    const task = tasks.find((entry) => entry && entry.id === candidate.id);
-    if (task) {
-      task.lastNotifiedAt = anchor;
+export function sanitizeAnchors(tasks) {
+  for (const task of tasks) {
+    if (!task || typeof task !== "object") continue;
+    if (
+      "lastNotifiedAt" in task &&
+      task.lastNotifiedAt !== null &&
+      typeof task.lastNotifiedAt !== "string"
+    ) {
+      task.lastNotifiedAt = null; // untyped garbage from a foreign writer
     }
   }
 }

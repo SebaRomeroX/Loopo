@@ -23,6 +23,7 @@
   --accent: #2f4fbf;
   --on-accent: #ffffff;
   --danger: #b3261e;
+  --warn: #8a5300;
   --radius: 10px;
 }
 
@@ -257,6 +258,27 @@ body {
   color: var(--danger);
 }
 
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Read-only session (T6): author styles would otherwise beat the UA's own
+   disabled styling, so make disabled controls visibly inert. */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* …including the text of the kind-picker labels, whose clicking does
+   nothing once their radio is disabled. */
+.kind-option:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .form-actions,
 .task__actions {
   display: flex;
@@ -394,6 +416,49 @@ body {
   text-transform: uppercase;
 }
 
+/* ---- banners (T6 failure paths) ---- */
+
+.banners:not(:empty) {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.banner--warn {
+  border-color: var(--warn);
+}
+
+.banner__text {
+  margin: 0;
+  flex: 1 1 12rem;
+  font-size: 0.9375rem;
+}
+
+.banner__close {
+  flex: none;
+}
+
+.form-read-only {
+  margin: 0;
+  padding: 8px 10px;
+  border-left: 3px solid var(--danger);
+  color: var(--danger);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
 /* ---- wider viewports: enhancement only ---- */
 
 @media (min-width: 640px) {
@@ -417,5 +482,6 @@ body {
     --accent: #93a8ff;
     --on-accent: #131318;
     --danger: #f2b8b5;
+    --warn: #e6b464;
   }
 }
