@@ -18,7 +18,10 @@ function pad2(n) {
   return String(n).padStart(2, "0");
 }
 
-/** An ISO instant → local `datetime-local` value (`YYYY-MM-DDTHH:mm`). */
+/** An ISO instant → local `datetime-local` value (`YYYY-MM-DDTHH:mm`).
+ *  Always the *browser's* wall clock, never the task zone: the control
+ *  round-trips local → instant on save, so a task-zone prefill would
+ *  silently shift the stored instant whenever the two zones differ. */
 function toLocalInput(iso) {
   const d = new Date(iso);
   return (
@@ -156,8 +159,8 @@ export function createForm(doc, { onSubmit }) {
   }
 
   function fail(message, control) {
+    error.hidden = false; // unhide first so role="alert" announces the text
     error.textContent = message;
-    error.hidden = false;
     if (control) control.focus();
     return false;
   }
@@ -312,6 +315,15 @@ export function createForm(doc, { onSubmit }) {
       fill(task);
       setMode(task);
       titleInput.select();
+    },
+    /** Drop edit mode when `taskId` is the task being edited (its row may
+     *  disappear — a delete here or a `storage` event from T6). */
+    resetIfEditing(taskId) {
+      if (editing && editing.id === taskId) {
+        clearError();
+        fill(null);
+        setMode(null);
+      }
     },
   };
 }
