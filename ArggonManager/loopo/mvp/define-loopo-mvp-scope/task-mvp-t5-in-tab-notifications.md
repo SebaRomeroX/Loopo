@@ -1,14 +1,18 @@
 ---
 type: task
-status: todo
+status: in_progress
 id: task-mvp-t5-in-tab-notifications
 title: "MVP T5: in-tab notifications - permission, dedupe, missed marker"
+assignee: SebaRomeroX
+branch: feat/task-mvp-t5-in-tab-notifications
 parent: define-loopo-mvp-scope
 labels: [implementation]
 priority: p1
 created: "2026-10-03"
-updated: "2026-10-03"
+updated: "2026-10-05"
+claimed_at: "2026-10-05T13:49:05.412Z"
 depends_on: [task-mvp-t4-reminder-engine]
+worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t5-in-tab-notifications
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-mvp-t5-in-tab-notifications.md
