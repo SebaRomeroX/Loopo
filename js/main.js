@@ -3,12 +3,19 @@
  * list (or the first-run empty state when no task exists). Every change goes
  * through `saveTasks`; load/save failures are reported on the console until
  * T6 lands the banner/message UI.
+ *
+ * The reminder engine (T4) runs on load, on a 30 s timer while the page is
+ * open, on `visibilitychange` (back to visible) and on `focus` (spec
+ * Synopsis): it initializes/advances loop `nextAt` (persisting only when it
+ * actually advanced) and collects occurrences — the stream T5's in-tab
+ * notifications will consume.
  */
 import { loadTasks, saveTasks } from "./store.js";
 import { KINDS } from "./kinds.js";
 import { renderEmptyState } from "./empty-state.js";
 import { renderList } from "./list.js";
 import { createForm } from "./form.js";
+import { tick } from "./engine.js";
 
 const app = document.getElementById("app");
 
@@ -36,6 +43,14 @@ function isRenderable(task) {
     return false;
   }
   if (!KINDS.some((kind) => kind.id === task.kind)) return false;
+  // The model promises a valid IANA zone (createTask); hand-edited storage
+  // may break that and `Intl` would throw on the render path (counter
+  // detail, engine scheduling). The engine guards itself as well.
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: task.zone });
+  } catch {
+    return false;
+  }
   if (task.kind === "loop") {
     return (
       !!task.rule &&
@@ -72,6 +87,23 @@ function persist() {
   }
 }
 
+/**
+ * Run the engine once; persist only when it advanced state (a fresh loop's
+ * first `nextAt`, or a crossing moved past `now`).
+ * @param {{ persistChanges?: boolean }} options — `commit` passes false to
+ *   fold its own write and the engine's into a single atomic `setItem`.
+ */
+function runEngine({ persistChanges = true } = {}) {
+  const { changed } = tick(tasks, Date.now());
+  // tick() also yields `occurrences` — the stream T5's notifications consume.
+  if (changed && persistChanges) persist();
+}
+
+function refresh() {
+  runEngine();
+  render();
+}
+
 /** Add (fresh id) or replace (same id), then persist and re-render. */
 function commit(task) {
   const index = tasks.findIndex((candidate) => candidate.id === task.id);
@@ -80,6 +112,7 @@ function commit(task) {
   } else {
     tasks.push(task);
   }
+  runEngine({ persistChanges: false }); // a fresh loop gets its nextAt now
   persist();
   render();
 }
@@ -106,4 +139,12 @@ function render() {
   );
 }
 
-render();
+// Engine + paint: on load, on a timer while open, on becoming visible again
+// and on focus (spec Synopsis: "on load, on a timer while open, and on
+// visibilitychange/focus").
+refresh();
+setInterval(refresh, 30_000);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") refresh();
+});
+window.addEventListener("focus", refresh);

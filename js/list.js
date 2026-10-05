@@ -1,9 +1,10 @@
 /**
- * Task list: one card per task with always-visible Edit/Delete actions —
- * nothing is revealed on hover. Every text node is set through `textContent`.
+ * Task list: one card per task with its engine-computed due status and
+ * always-visible Edit/Delete actions — nothing is revealed on hover. Every
+ * text node is set through `textContent`.
  */
 import { kindLabel } from "./kinds.js";
-import { taskDetail } from "./format.js";
+import { taskDetail, taskStatus } from "./format.js";
 
 function actionButton(doc, { text, ariaLabel, className, onClick }) {
   const button = doc.createElement("button");
@@ -16,8 +17,10 @@ function actionButton(doc, { text, ariaLabel, className, onClick }) {
 }
 
 function taskElement(doc, task, { onEdit, onDelete }) {
+  const status = taskStatus(task, Date.now());
+
   const item = doc.createElement("li");
-  item.className = "task";
+  item.className = status && status.due ? "task task--due" : "task";
 
   const body = doc.createElement("div");
   body.className = "task__body";
@@ -37,6 +40,12 @@ function taskElement(doc, task, { onEdit, onDelete }) {
   body.appendChild(kind);
   body.appendChild(title);
   body.appendChild(detail);
+  if (status) {
+    const line = doc.createElement("span");
+    line.className = status.due ? "task__status task__status--due" : "task__status";
+    line.textContent = status.text;
+    body.appendChild(line);
+  }
 
   const actions = doc.createElement("div");
   actions.className = "task__actions";

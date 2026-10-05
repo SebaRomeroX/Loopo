@@ -29,10 +29,11 @@ Loopo/
   index.html     # static shell: header, <noscript> fallback, #app mount point
   styles.css     # mobile-first styles — base targets 320 px, only widens on larger viewports
   js/            # app ES modules loaded directly (no build step, no dependencies):
-    main.js        # entry module: load once, render list/empty state, commit saves
+    main.js        # entry module: engine ticks (load/timer/visibility/focus), list/empty render, saves
+    engine.js      # due computation: zone-correct loop steps, date countdown, occurrence stream (T5)
     empty-state.js # first-run empty state: one example per reminder kind
-    format.js      # task -> one-line detail string (shared by empty state + list)
-    list.js        # task list: per-task Edit/Delete, textContent-only rendering
+    format.js      # task -> detail + due-status strings (engine-backed), textContent-only
+    list.js        # task list: due badge, per-task Edit/Delete, textContent-only rendering
     form.js        # add/edit form; the kind picker swaps the second field
     kinds.js       # reminder-kind registry (loop/date/counter) shared by every screen
     tasks.js       # task model: createTask with loud per-kind validation

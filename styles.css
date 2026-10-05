@@ -307,6 +307,21 @@ body {
   font-size: 0.875rem;
 }
 
+.task__status {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.task__status--due {
+  color: var(--danger);
+}
+
+.task--due {
+  border-color: var(--danger);
+}
+
 /* ---- wider viewports: enhancement only ---- */
 
 @media (min-width: 640px) {
