@@ -47,6 +47,14 @@ export function createForm(doc, { onSubmit }) {
   heading.id = "task-form-title";
   heading.textContent = "Add reminder";
 
+  // Read-only mode (T6): shown only when storage is blocked — the
+  // explanatory message the spec asks for alongside the disabled controls.
+  const readOnlyNote = doc.createElement("p");
+  readOnlyNote.className = "form-read-only";
+  readOnlyNote.hidden = true;
+  readOnlyNote.textContent =
+    "Browser storage is blocked — this session is read-only, so create and edit are disabled and changes cannot be saved.";
+
   function labelFor(text, htmlFor) {
     const label = doc.createElement("label");
     label.className = "field__label";
@@ -184,6 +192,7 @@ export function createForm(doc, { onSubmit }) {
   actions.appendChild(cancel);
 
   form.appendChild(heading);
+  form.appendChild(readOnlyNote);
   form.appendChild(field("Title", titleInput));
   form.appendChild(picker);
   for (const group of kindGroups) form.appendChild(group);
@@ -194,6 +203,8 @@ export function createForm(doc, { onSubmit }) {
 
   /** The task being edited, or null in add mode. */
   let editing = null;
+  /** Storage-blocked session (T6): controls disabled, submits refused. */
+  let readOnly = false;
 
   function selectedKind() {
     for (const radio of radios) {
@@ -242,6 +253,13 @@ export function createForm(doc, { onSubmit }) {
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+    // Belt: disabled controls cannot submit, but a blocked session must
+    // refuse loudly even if something re-enables the DOM around it.
+    if (readOnly) {
+      return fail(
+        "This session is read-only — browser storage is blocked, so changes cannot be saved."
+      );
+    }
     clearError();
 
     const title = titleInput.value.trim();
@@ -309,8 +327,25 @@ export function createForm(doc, { onSubmit }) {
   fill(null);
   setMode(null);
 
+  const controls = [
+    titleInput,
+    ...radios,
+    everyInput,
+    unitSelect,
+    dateInput,
+    startInput,
+    submit,
+    cancel,
+  ];
+
   return {
     element: form,
+    /** Read-only mode (T6): disable every control and explain why. */
+    setReadOnly(value) {
+      readOnly = value;
+      readOnlyNote.hidden = !value;
+      for (const control of controls) control.disabled = value;
+    },
     /** Prefill the form for editing `task` and focus it. */
     edit(task) {
       clearError();
@@ -325,6 +360,16 @@ export function createForm(doc, { onSubmit }) {
         clearError();
         fill(null);
         setMode(null);
+      }
+    },
+    /** Adopt another tab's dedupe anchor onto the task being edited (T6
+     *  convergence): saving after their notification must not resurrect a
+     *  stale `lastNotifiedAt`. No-op when `taskId` is not being edited;
+     *  tasks without the field are left alone (conservative: an already-
+     *  shown occurrence stays suppressed). */
+    syncAnchor(taskId, source) {
+      if (editing && editing.id === taskId && source && "lastNotifiedAt" in source) {
+        editing.lastNotifiedAt = source.lastNotifiedAt;
       }
     },
   };

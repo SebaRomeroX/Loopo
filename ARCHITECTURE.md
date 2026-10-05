@@ -29,13 +29,14 @@ Loopo/
   index.html     # static shell: header, <noscript> fallback, #app mount point
   styles.css     # mobile-first styles — base targets 320 px, only widens on larger viewports
   js/            # app ES modules loaded directly (no build step, no dependencies):
-    main.js        # entry module: engine ticks (load/timer/visibility/focus), occurrence consumption, storage dedupe sync
+    main.js        # entry module: engine ticks (load/timer/visibility/focus), occurrence consumption, banners + read-only mode, storage-event last-write-wins convergence
     engine.js      # due computation: zone-correct loop steps, date countdown, occurrence stream (T5)
-    notify.js      # occurrence -> notification/in-app notice: gesture-gated permission, dedupe anchor, missed marker
+    notify.js      # occurrence -> notification/in-app notice: gesture-gated permission, dedupe anchor, missed marker, adopted-anchor sanitizer
+    banners.js     # keyed session banners: load/save failure paths, hidden-task warnings, read-only explanation
     empty-state.js # first-run empty state: one example per reminder kind
     format.js      # task -> detail + due-status strings (engine-backed), textContent-only
     list.js        # task list: due badge, per-task Edit/Delete, textContent-only rendering
-    form.js        # add/edit form; the kind picker swaps the second field
+    form.js        # add/edit form; the kind picker swaps the second field; read-only disable + dedupe-anchor sync
     kinds.js       # reminder-kind registry (loop/date/counter) shared by every screen
     tasks.js       # task model: createTask with loud per-kind validation
     store.js       # loopo.tasks envelope: schemaVersion, migration, backup, atomic save
