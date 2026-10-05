@@ -1,14 +1,18 @@
 ---
 type: task
-status: todo
+status: in_progress
 id: task-mvp-t6-failure-paths-smoke-deploy
 title: "MVP T6: failure paths, multi-tab sync, offline, smoke + deploy"
+assignee: SebaRomeroX
+branch: feat/task-mvp-t6-failure-paths-smoke-deploy
 parent: define-loopo-mvp-scope
 labels: [implementation]
 priority: p1
 created: "2026-10-03"
-updated: "2026-10-03"
+updated: "2026-10-05"
+claimed_at: "2026-10-05T14:50:43.142Z"
 depends_on: [task-mvp-t3-list-kind-form, task-mvp-t5-in-tab-notifications]
+worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t6-failure-paths-smoke-deploy
 ---
 <!--
   Placement (v0): ArggonManager/loopo/mvp/define-loopo-mvp-scope/task-mvp-t6-failure-paths-smoke-deploy.md
