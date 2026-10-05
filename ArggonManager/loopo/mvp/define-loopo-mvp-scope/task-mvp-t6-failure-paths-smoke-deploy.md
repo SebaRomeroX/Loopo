@@ -258,3 +258,16 @@ recorded rationales below.
 
 - Depends on T3 and T5 (transitively T4). `task-mvp-testing-policy` must have
   landed before review (this item closes the manual-smoke row).
+
+### 2026-10-05 @ses_efd5fb7b9ffeQRYizJKKwA6ggv
+### Review verdict: approve (arggon-reviewer)
+
+**Pass 1** — `request-changes` (session `ses_ef336e912ffeaf1mSVwh245C2V`, head 42fa301): 1 blocker + 6 should-fix + 6 nits.
+- **B1**: a save after an unknown-version load overwrote the future envelope (spec row 7 "never overwritten" / T2's deferred handoff) — coordinator reproduced it, then fixed it with `futureGuard` + a persistent refusal banner; re-probe shows the primary byte-identical after a create.
+- Applied: ARCHITECTURE.md TODOs written (S1), delete-without-confirmation decision recorded (S2), `storage.clear()` key-null convergence (S3, probed removeItem + clear()), adoption warn banner (S4, probed), Pages deploy config-in-repo via workflow + `build_type: workflow` (S6), Cancel stays enabled in read-only (N2, probed), kind-label dimming (N3), id-keyed unrenderable warnings (N4), `save:invalid-tasks` cleared on success (N6), quota message states the on-screen-only caveat (probed with a real fill).
+- Accepted rationales: N1 (no `storageArea` check — key equality suffices for sessionStorage, and touching `window.localStorage` in the listener would re-introduce a SecurityError throw site in blocked sessions), N5 (engine `warnOnce` console-only — surfacing it would break the engine's no-DOM boundary).
+- Provenance recorded (S5): row 16's deployed-origin run pre-dates this code (T5-era build; deploy-origin behavior under test) — re-run on `main` after merge is committed on the item.
+
+**Re-verification** — `approve` (session `ses_ef319c671ffeBUeOcwD0A7poG8`, head a765b71): all 13 findings resolved or accepted with recorded rationale; cross-checked by reading the shipped files (single `saveTasks` call site through `persist()`, boundary rules vs actual imports, both catch paths banner'd, discriminating Cancel assertion in the smoke); CI green (`tasks-validate`, run 37341104898); no scope creep. Follow-up nits recorded, non-blocking: missing EOF newline in store.js (no gate enforces it; fix on next touch), stale `futureGuard` after a raw v1 write over a v99 value (post-MVP polish), `adopted()` helper naming.
+
+**Recommendation: merge.** Evidence: PR #11 body (17-row expected-vs-observed table), item acceptance boxes (4/4 with observations), review-round dispositions.
