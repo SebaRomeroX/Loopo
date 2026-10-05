@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-mvp-t6-failure-paths-smoke-deploy
 title: "MVP T6: failure paths, multi-tab sync, offline, smoke + deploy"
 assignee: SebaRomeroX
@@ -10,7 +10,6 @@ labels: [implementation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-05"
-claimed_at: "2026-10-05T14:50:43.142Z"
 depends_on: [task-mvp-t3-list-kind-form, task-mvp-t5-in-tab-notifications]
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t6-failure-paths-smoke-deploy
 ---
@@ -217,11 +216,14 @@ recorded rationales below.
   — it was ignored here." — instead of console-only, so the PR note can
   claim what actually ships. Probed: one keyed banner (no stack on repeat),
   dismissable, `role="alert"`, nothing adopted.
-- **S5 (recorded):** row 16's deployed-origin run predates this PR's code
-  (Pages was enabled from `main` = T5 build) — the cache/offline behavior
-  under test is deploy-origin behavior, not T6-UI behavior. Will re-run the
-  offline navigation probe on `main` after merge as part of the final
-  verification.
+- **S5 (recorded, re-run done):** row 16's deployed-origin run predates this
+  PR's code (Pages was enabled from `main` = T5 build) — the cache/offline
+  behavior under test is deploy-origin behavior, not T6-UI behavior.
+  Re-run on `main` after merge (`e197b52`, T6 build live, workflow deploy
+  green): `js/banners.js` → 200, `.banners` mount present, seeded due state
+  renders; offline → uncached probe URL `ERR_INTERNET_DISCONNECTED`, app
+  URL served from HTTP cache → "Overdue" + "5h 33m elapsed", form works,
+  all resources same-origin.
 - **S6 (fixed):** `.github/workflows/pages.yml` (pinned to tag refs, the
   repo's convention) + Pages switched to `build_type: workflow` via API —
   deploy is now config-in-repo; the one-time source switch is documented in
