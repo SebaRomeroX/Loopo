@@ -29,8 +29,11 @@ Loopo/
   index.html     # static shell: header, <noscript> fallback, #app mount point
   styles.css     # mobile-first styles — base targets 320 px, only widens on larger viewports
   js/            # app ES modules loaded directly (no build step, no dependencies):
-    main.js        # entry module: mounts the dynamic region (#app)
+    main.js        # entry module: load once, render list/empty state, commit saves
     empty-state.js # first-run empty state: one example per reminder kind
+    format.js      # task -> one-line detail string (shared by empty state + list)
+    list.js        # task list: per-task Edit/Delete, textContent-only rendering
+    form.js        # add/edit form; the kind picker swaps the second field
     kinds.js       # reminder-kind registry (loop/date/counter) shared by every screen
     tasks.js       # task model: createTask with loud per-kind validation
     store.js       # loopo.tasks envelope: schemaVersion, migration, backup, atomic save
