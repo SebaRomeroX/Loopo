@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-mvp-t2-localstorage-store
 title: "MVP T2: task model + localStorage store"
 assignee: SebaRomeroX
@@ -9,8 +9,7 @@ parent: define-loopo-mvp-scope
 labels: [implementation]
 priority: p1
 created: "2026-10-03"
-updated: "2026-10-03"
-claimed_at: "2026-10-03T22:11:37.849Z"
+updated: "2026-10-05"
 depends_on: [task-mvp-t1-shell-empty-state]
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t2-localstorage-store
 ---
