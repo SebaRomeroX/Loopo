@@ -129,3 +129,49 @@ recurrence keeping wall-clock time across DST transitions, `date` countdown,
   carry ids to avoid leaking untrusted titles into every console). The
   interval's `document.hidden` gating stays open (spec Synopsis's "on a
   timer while open" — no acceptance row covers it).
+
+### 2026-10-05 @SebaRomeroX
+## Review verdict (PR #9): **approve** (round 2) — after request-changes (round 1)
+
+Independent `arggon-reviewer`, both rounds against the engineering bar.
+
+**Round 1 → request-changes** — one blocker, three should-fixes, nits:
+
+- **B1 (blocker)**: a huge-but-integer `every` in `hours` (the form's
+  number input is unbounded) produced a finite-but-unrepresentable
+  instant; `toISOString()` threw `RangeError`, crashing `tick` and
+  blanking the list. Reachable from plain UI input — violated the
+  "never throw / never blank" bar.
+- S1 warn-once key collision; S2 tick's loop branch re-implemented due
+  truth instead of calling `evaluateTask`; S3 the skip warning blamed
+  "kind payload" for invalid-zone tasks; N2–N6 (session-set keying,
+  loop-badge comment, PR citation, warn ids, missed-slack wording).
+
+**Fixes (e0d7549)**: `nextAfter` bounds the hours step to `MAX_TIME_MS`
+and every persisted instant goes through the guarded `toIsoOrNull`
+writer; distinct warn keys `unschedulable:`/`cap:`; loop branch consumes
+`evaluateTask`; `renderProblem` reports the concrete reason; session set
+keyed `id + targetDate`; N3/N4/N6 done; N5 dispositioned (ids in logs,
+id→title mapping recorded as T6 requirement); T5 pitfalls recorded on
+this item (cross-tab storage dedupe, throttled-but-not-missed, date
+`lastNotifiedAt` dropped on edit, stream-driven loop indicators).
+
+**Round 2 → approve** (verified by execution on e0d7549):
+
+- B1 probes A–E all `no throw` (advance, init, days-unit, 1e300 hours);
+  boundary probe confirms normal rules unaffected (`every:1` hours →
+  exact +1 h). `toIsoOrNull` is the only `toISOString()` writer in the
+  engine.
+- Engine smoke extended with discriminating B1 cases (rule guards +
+  6h init/advance) — **7/7 ALL PASS**; these fail against the pre-fix
+  head 70eeb34. T3 regression smoke **11/11**. `arggon validate` ok,
+  `node --check` ×9, CI `tasks-validate` green on e0d7549 (run
+  37262957175), head SHA matches local.
+- Behavior of the S2 change proven identical: smoke 6a–6g expected
+  values pass unmodified.
+- Evidence rows 4/5/6 re-confirmed as holding (stepping math, format,
+  refresh wiring untouched by the fix commit).
+
+MVP testing exception applies (`task-mvp-testing-policy`): smokes are
+scratch-only in `/tmp/opencode/t4/`, evidence recorded on the item and
+in the PR body.
