@@ -51,3 +51,7 @@ claiming implementation work.
 
 - Supersession of the MVP's "Web Push deferred" non-goal happens HERE, via
   spec, not silently in an implementation PR.
+
+### handoff 2026-10-05 @ses_efd5fb7b9ffeQRYizJKKwA6ggv (session: ses_efd5fb7b9ffeQRYizJKKwA6ggv) — next: Claim it and start with research: Web Push under the MVP's 0-dependency/zero-backend constraints (service worker + VAPID keys + a sender) before any code — ADR/spec decision first.
+- branch: main
+- open questions: Who originates pushes with no backend (serverless sender / third-party / self-hosted)? Does enabling a service worker change the deploy story (GitHub Pages)? How does push interact with localStorage-…
