@@ -1,6 +1,6 @@
 ---
 type: task
-status: in_progress
+status: done
 id: task-mvp-t3-list-kind-form
 title: "MVP T3: task list + kind-aware create/edit form"
 assignee: SebaRomeroX
@@ -10,7 +10,6 @@ labels: [implementation]
 priority: p1
 created: "2026-10-03"
 updated: "2026-10-05"
-claimed_at: "2026-10-05T02:26:27.070Z"
 depends_on: [task-mvp-t2-localstorage-store]
 worktree_path: /home/sebarmx/Documents/GitHub/Loopo-task-mvp-t3-list-kind-form
 ---
