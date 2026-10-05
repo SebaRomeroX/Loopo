@@ -185,7 +185,8 @@ export function saveTasks(tasks, storage) {
       error: quota
         ? {
             type: "quota",
-            message: "Storage is full — the save was rejected and your stored list is unchanged.",
+            message:
+              "Storage is full — the save was rejected and your stored list is unchanged; this change stays on screen only until storage is freed.",
           }
         : {
             type: "unavailable",

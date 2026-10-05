@@ -1,0 +1,38 @@
+# Deploy the static site to GitHub Pages (ADR 0005: cheap-path-to-prod).
+#
+# Config lives here, not in console-only settings: a rebuild/redeploy is a
+# push to main, and the whole deploy recipe is reviewable in-repo
+# (ArggonManager/docs/deploy.md). GitHub Pages must be set to source
+# "GitHub Actions" once per repository (Settings → Pages → Build and
+# deployment → Source: GitHub Actions); everything after that is this file.
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Serialize deployments; never cancel an in-flight one mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

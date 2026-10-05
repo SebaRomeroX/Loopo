@@ -37,6 +37,8 @@ const loaded = loadTasks();
 let tasks = loaded.tasks;
 /** Storage blocked → session-local read-only (spec's storage-blocked row). */
 let readOnly = false;
+/** Unknown/newer envelope → saves must never overwrite it (spec row 7). */
+let futureGuard = false;
 
 const form = createForm(document, { onSubmit: commit });
 const noticesSlot = document.createElement("div");
@@ -73,6 +75,11 @@ if (loaded.failure) {
     banners.show(`load:${loaded.failure.type}`, loaded.failure.message, {
       tone: "error",
     });
+    if (loaded.failure.type === "unknown-version") {
+      // T2's deferred handoff: this session must not write over the
+      // newer envelope — `persist()` enforces it on every save attempt.
+      futureGuard = true;
+    }
   }
 }
 
@@ -127,8 +134,13 @@ function forDisplay(list) {
       displayable.push(task);
       continue;
     }
-    if (!warnedUnrenderable.has(task)) {
-      warnedUnrenderable.add(task);
+    // Key on the id, not the object: adoption re-parses tasks, so identity
+    // keys would re-warn (and leak detached objects into the Set) on every
+    // storage event (review N4).
+    const idKey =
+      task && typeof task.id === "string" ? task.id : "unknown";
+    if (!warnedUnrenderable.has(idKey)) {
+      warnedUnrenderable.add(idKey);
       console.warn(
         `Loopo: skipping a stored task — ${problem} (id ${task?.id ?? "unknown"}).`
       );
@@ -173,9 +185,24 @@ function persist() {
     // persistent read-only banner already carries — no per-write nag.
     return;
   }
+  if (futureGuard) {
+    // Spec row 7: an unknown/newer envelope is never overwritten — not by
+    // the load path and not by a later save either. In-memory changes
+    // stay on screen for this session; the refusal says so (persistent —
+    // a dismissed refusal must not turn silent on the next attempt).
+    banners.show(
+      "future-guard",
+      "Not saving — the stored reminders come from a newer version of Loopo and must not be overwritten. Changes stay on screen for this session only.",
+      { tone: "error", dismissable: false }
+    );
+    return;
+  }
   const saved = saveTasks(tasks);
   if (saved.ok) {
     banners.dismiss("save:quota");
+    // save:invalid-tasks is a programmer error (unreachable today), but a
+    // later success proves writes work again — clear it too.
+    banners.dismiss("save:invalid-tasks");
     return;
   }
   console.warn(`Loopo: ${saved.error.message}`);
@@ -287,10 +314,18 @@ window.addEventListener("focus", refresh);
 // and notification anchors together (subsumes T5's anchor-only sync; the
 // guards travel: envelope schemaVersion/shape here, anchor types in
 // `sanitizeAnchors`). An unreadable or foreign-version update is ignored —
-// never adopt data we cannot trust. A cleared key (newValue null)
-// converges to an empty list: that write won too.
+// never adopt data we cannot trust — and says so in a banner. A removed or
+// cleared key (newValue null; `clear()` reports key null) converges to an
+// empty list: that write won too.
 window.addEventListener("storage", (event) => {
-  if (event.key !== STORAGE_KEY) return;
+  if (event.key !== STORAGE_KEY && event.key !== null) return;
+  const adopted = () => {
+    banners.show(
+      "adopt-ignored",
+      "Another tab stored a value this app could not read — it was ignored here.",
+      { tone: "warn" }
+    );
+  };
   let next;
   if (event.newValue === null) {
     next = [];
@@ -305,11 +340,13 @@ window.addEventListener("storage", (event) => {
         )
       ) {
         console.warn("Loopo: ignoring a storage update with an unknown shape.");
+        adopted();
         return;
       }
       next = parsed.tasks;
     } catch {
       console.warn("Loopo: ignoring an unreadable storage update.");
+      adopted();
       return;
     }
   }

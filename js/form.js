@@ -327,6 +327,9 @@ export function createForm(doc, { onSubmit }) {
   fill(null);
   setMode(null);
 
+  // Cancel is deliberately absent: it only resets the form (never
+  // persists), so it stays usable even in read-only mode — trapping an
+  // open edit behind a disabled Cancel would strand the user (review N2).
   const controls = [
     titleInput,
     ...radios,
@@ -335,7 +338,6 @@ export function createForm(doc, { onSubmit }) {
     dateInput,
     startInput,
     submit,
-    cancel,
   ];
 
   return {
