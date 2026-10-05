@@ -32,6 +32,8 @@ Loopo/
     main.js        # entry module: mounts the dynamic region (#app)
     empty-state.js # first-run empty state: one example per reminder kind
     kinds.js       # reminder-kind registry (loop/date/counter) shared by every screen
+    tasks.js       # task model: createTask with loud per-kind validation
+    store.js       # loopo.tasks envelope: schemaVersion, migration, backup, atomic save
   ArggonManager/ # tracker root: work items + product docs (ArggonManager/docs/)
 ```
 
