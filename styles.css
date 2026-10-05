@@ -8,6 +8,11 @@
   box-sizing: border-box;
 }
 
+/* The hidden attribute must beat every `display` rule in this file. */
+[hidden] {
+  display: none !important;
+}
+
 :root {
   color-scheme: light dark;
   --bg: #fbfbfd;
@@ -16,6 +21,8 @@
   --muted: #5d5d6a;
   --line: #dcdce5;
   --accent: #2f4fbf;
+  --on-accent: #ffffff;
+  --danger: #b3261e;
   --radius: 10px;
 }
 
@@ -95,7 +102,8 @@ body {
   background: var(--surface);
 }
 
-.example__kind {
+.example__kind,
+.task__kind {
   display: block;
   font-size: 0.75rem;
   font-weight: 600;
@@ -114,6 +122,187 @@ body {
 .example__detail {
   display: block;
   margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* ---- add/edit form ---- */
+
+.task-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.task-form__title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field__label,
+.kind-picker legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px; /* comfortable tap target */
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 16px; /* keeps mobile browsers from zooming on focus */
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+}
+
+.kind-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.kind-picker legend {
+  padding: 0;
+}
+
+.kind-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.kind-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.kind-option input {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.kind-option:has(input:checked) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.kind-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.9375rem;
+}
+
+/* ---- buttons ---- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn--ghost {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.btn--danger {
+  color: var(--danger);
+}
+
+.form-actions,
+.task__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.form-actions .btn,
+.task__actions .btn {
+  flex: 1;
+}
+
+/* ---- task list ---- */
+
+.task-list__title {
+  margin: 0 0 8px;
+  font-size: 1.125rem;
+}
+
+.tasks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.task {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.task__body {
+  display: grid;
+  gap: 2px;
+}
+
+.task__title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.task__detail {
   color: var(--muted);
   font-size: 0.875rem;
 }
@@ -139,5 +328,7 @@ body {
     --muted: #a2a2b0;
     --line: #33333f;
     --accent: #93a8ff;
+    --on-accent: #131318;
+    --danger: #f2b8b5;
   }
 }

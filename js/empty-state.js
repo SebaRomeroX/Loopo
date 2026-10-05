@@ -4,6 +4,7 @@
  * titles are data, never markup.
  */
 import { kindLabel } from "./kinds.js";
+import { taskDetail } from "./format.js";
 
 const EXAMPLES = [
   { kind: "loop", title: "Drink water", rule: { every: 2, unit: "hours" } },
@@ -15,45 +16,6 @@ const EXAMPLES = [
     zone: "Europe/Berlin",
   },
 ];
-
-/** Recurrence rule: plain data, no clock involved yet (due logic is T4). */
-function loopDetail(rule) {
-  return `every ${rule.every} ${rule.unit}`;
-}
-
-/** A `targetDate` is a calendar date: format in UTC so the day never shifts. */
-function dateDetail(targetDate) {
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(targetDate));
-}
-
-/** An instant is formatted in the task's stored IANA zone (ADR 0001). */
-function counterDetail(startedAt, zone) {
-  return `since ${new Intl.DateTimeFormat(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: zone,
-  }).format(new Date(startedAt))}`;
-}
-
-function detailFor(example) {
-  switch (example.kind) {
-    case "loop":
-      return loopDetail(example.rule);
-    case "date":
-      return dateDetail(example.targetDate);
-    case "counter":
-      return counterDetail(example.startedAt, example.zone);
-    default:
-      throw new Error(`unknown reminder kind: ${example.kind}`);
-  }
-}
 
 function exampleElement(doc, example) {
   const item = doc.createElement("li");
@@ -69,7 +31,7 @@ function exampleElement(doc, example) {
 
   const detail = doc.createElement("span");
   detail.className = "example__detail";
-  detail.textContent = detailFor(example);
+  detail.textContent = taskDetail(example);
 
   item.appendChild(kind);
   item.appendChild(title);
