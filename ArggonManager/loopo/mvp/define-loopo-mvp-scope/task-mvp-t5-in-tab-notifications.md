@@ -147,3 +147,34 @@ elapsed while the tab was closed.
   convergence lands. Permission-row refresh rides on `refresh()` already.
   `document.hidden` gating of the 30 s interval remains open (spec
   Synopsis wording, no acceptance row).
+
+### 2026-10-05 @SebaRomeroX
+## Review verdict (PR #10): **approve** (round 1, with non-blocking follow-ups applied)
+
+Independent `arggon-reviewer` against the engineering bar; rows 14 + 15
+independently re-verified in Chromium (gesture count, dedupe across reload,
+both `missed` markers, XSS literal) — matched the worker's evidence.
+
+**Verdict: approve — no blockers.** Applied anyway (same PR, `ed656b5`):
+
+- **SF-1**: the `storage` listener now requires
+  `schemaVersion === SCHEMA_VERSION` before copying, and
+  `syncLastNotified` accepts only `null`/string anchors — a cross-version
+  or hand-edited envelope can no longer poison the dedupe equality.
+- **N2** `refresh()` re-reads `Notification.permission` (settings can
+  change while open). **N3** listener comment reworded to honest
+  best-effort (simultaneous-tick window open until T6). **N4** anchor
+  write inside the per-occurrence `try`. **N5** corrupt `taskDetail` falls
+  back with a warn — kind + title still render. **N6** linear-scan ceiling
+  stated in the doc comments.
+- **N7 not applied, rationale recorded**: callback-era Safari (<16) ignores
+  the promise return of `requestPermission()`; Loopo targets evergreen
+  browsers (spec: HTTPS/localhost, no legacy claims) and a dead callback
+  parameter would be speculative code.
+
+Evidence (both smokes rerun after the follow-ups): T5 **9/9 ALL PASS**
+(sections extended for SF-1 garbage anchors and N5 kept-title), T4 engine
+regression **7/7**, `node --check` ×10, `arggon validate` ok.
+MVP testing exception applies (`task-mvp-testing-policy`): smokes are
+scratch-only in `/tmp/opencode/t5/`, evidence recorded on the item and in
+the PR body (Review table maps each finding to its disposition).
