@@ -77,18 +77,55 @@ recurrence keeping wall-clock time across DST transitions, `date` countdown,
     the anchor. T3's edit path resets `nextAt` → engine re-anchors on rule
     change (documented in `js/form.js`).
   - **Missed detection**: a crossing observed more than 2 min late
-    (`MISSED_SLACK_MS`) carries `missed: true` — a throttled background
-    timer or a closed tab both land there; live ticks never do.
+    (`MISSED_SLACK_MS`) carries `missed: true`. Chrome's ~1/min hidden-tab
+    throttling stays *under* the slack (so a background tab is not marked
+    missed); a suspended/closed tab, a cold reload hours later, or any
+    absence beyond the slack lands there. Live ticks never do.
+    A **date** task has no sub-day lateness: its `missed` flag means the
+    target is already ≥1 day overdue when the occurrence surfaces.
   - **Cap**: more than 1 000 missed loop steps anchor `nextAt` from `now`
     (O(1)) with a warn-once; an unschedulable rule clears `nextAt` instead
     of storming (the due occurrence still surfaces exactly once).
-  - **Date occurrences** emit once per page session (module set); `counter`
-    never emits — spec shows it as elapsed display, notifications are T5's
-    call. Re-emission across reloads is T5's `lastNotifiedAt` to dedupe.
+  - **Date occurrences** emit once per page session (module set keyed
+    `id + targetDate`); `counter` never emits — spec shows it as elapsed
+    display, notifications are T5's call. Re-emission across reloads is
+    T5's `lastNotifiedAt` to dedupe.
+- Review round 1 (independent `arggon-reviewer` on PR #9 →
+  `request-changes`): **B1** (blocker) — a huge-but-integer `every` in
+  `hours` (the form's number input is unbounded) could yield a
+  finite-but-unrepresentable instant whose `toISOString()` threw
+  `RangeError`, crashing `tick` and blanking the list. Fixed at the single
+  choke point: `nextAfter` bounds the hours step to `MAX_TIME_MS` and every
+  persisted instant now goes through `toIsoOrNull` (belt-and-braces).
+  Also applied: **S1** distinct warn-once keys (`unschedulable:`/`cap:`),
+  **S2** the tick loop branch consumes `evaluateTask` (one due truth, not a
+  re-implementation), **S3** the render gate reports the concrete reason
+  (`renderProblem`: unknown kind / invalid IANA zone / missing payload),
+  **N2** session set keyed `id + targetDate`, **N3** loop-badge
+  reachability comment; **N6** and the T5/T6 items above absorbed from the
+  review. Re-verified: engine smoke extended with B1 probes (sections 3 +
+  6h), T3 regression 11/11, reviewer's one-liner probe prints
+  `no throw, nextAt: null`.
 - For T5: occurrence shape is `{ taskId, kind: "loop"|"date", at, missed }`
   where `at` is the consumed loop `nextAt` (ISO) or the date's `targetDate`
   (date-only string) — dedupe key = `taskId + at`. `tick()` returns them;
   `js/main.js` marks the consumption seam in `runEngine()`. Writing
-  `lastNotifiedAt` remains T5's.
+  `lastNotifiedAt` remains T5's. Pitfalls to design around:
+  - Occurrences are **per-tab observations** — a second open tab sees the
+    same crossing, so cross-tab dedupe must be storage-backed
+    (`lastNotifiedAt` + `storage` events), not the session set.
+  - **Background throttling stays under the 2-min slack** — T5 must not
+    treat `missed: false` as "fired exactly on time", nor assume lateness
+    implies `missed: true`.
+  - Editing a `date` task currently **drops `lastNotifiedAt`** (`createTask`
+    only carries it for loops) — T5 must extend the carry-over or pick a
+    different carrier, or an edited target re-notifies after reload.
+  - In-app loop indicators should be driven by the **occurrence stream**,
+    not `taskStatus`'s `Due now` badge (the badge is normally unreachable —
+    every render path ticks first; see `js/format.js`).
 - For T6: engine `warnOnce` diagnostics (unschedulable rule, step-cap
-  anchor) are banner candidates alongside the load/save warnings.
+  anchor) are banner candidates alongside the load/save warnings; banners
+  keyed by task id must **map id → title** for display (warn messages only
+  carry ids to avoid leaking untrusted titles into every console). The
+  interval's `document.hidden` gating stays open (spec Synopsis's "on a
+  timer while open" — no acceptance row covers it).

@@ -22,6 +22,8 @@
 
 const MS_MINUTE = 60_000;
 const MS_DAY = 86_400_000;
+/** Largest instant `Date` can represent — beyond it `toISOString()` throws. */
+const MAX_TIME_MS = 8_640_000_000_000_000;
 /** Loop steps beyond this many missed occurrences anchor from `now` (O(1)). */
 const STEP_CAP = 1_000;
 /** A crossing observed later than this was not seen live → `missed`. */
@@ -34,6 +36,17 @@ function warnOnce(key, message) {
   if (warned.has(key)) return;
   warned.add(key);
   console.warn(message);
+}
+
+/**
+ * ISO string for an instant, or null when it cannot be one — the single
+ * writer for persisted `nextAt` values, so no unrepresentable instant (or
+ * non-number) can ever reach `toISOString()` and throw (review B1's
+ * belt-and-braces on top of `nextAfter`'s own bound).
+ */
+function toIsoOrNull(ms) {
+  if (!Number.isFinite(ms) || Math.abs(ms) > MAX_TIME_MS) return null;
+  return new Date(ms).toISOString();
 }
 
 function partsFormatter(zone) {
@@ -150,7 +163,12 @@ export function nextAfter(fromMs, rule, zone) {
 
   if (rule.unit === "hours") {
     const stepped = fromMs + rule.every * 3_600_000;
-    return Number.isFinite(stepped) ? stepped : null;
+    // Bounded here so a huge-but-integer `every` (the form's number input is
+    // unbounded) degrades to "unschedulable" instead of producing an instant
+    // whose `toISOString()` would throw (review B1).
+    return Number.isFinite(stepped) && Math.abs(stepped) <= MAX_TIME_MS
+      ? stepped
+      : null;
   }
 
   const from = zoneParts(fromMs, zone);
@@ -259,7 +277,11 @@ function advancePast(fromMs, now, rule, zone) {
   return { next: jump, reason: "anchored-from-now" };
 }
 
-/** Date tasks that already emitted their occurrence this page session. */
+/**
+ * Date tasks that already emitted their occurrence this page session —
+ * keyed `id + targetDate` so editing the task to a *new* target may emit
+ * again (the dedupe key T5 uses is also `taskId + at`).
+ */
 const dateEmitted = new Set();
 
 /**
@@ -280,25 +302,29 @@ export function tick(tasks, now) {
         // Fresh or reset (create/edit) loop: first occurrence one full rule
         // from "first computed" — persisted immediately so reloads keep it.
         const first = nextAfter(now, task.rule, task.zone);
-        if (first === null) {
+        const iso = first === null ? null : toIsoOrNull(first);
+        if (iso === null) {
           warnOnce(
-            `sched:${task.id}`,
+            `unschedulable:${task.id}`,
             `Loopo: cannot schedule "${task.id}" — rule or zone unusable.`
           );
         } else {
-          task.nextAt = new Date(first).toISOString();
+          task.nextAt = iso;
           changed = true;
         }
         continue;
       }
 
-      const at = Date.parse(task.nextAt);
-      if (!Number.isFinite(at)) {
+      // Due truth comes from evaluateTask — the same call the display badge
+      // makes, so the badge and the occurrence stream cannot disagree.
+      const evaluation = evaluateTask(task, now);
+      if (evaluation.nextAt === null) {
         task.nextAt = null; // corrupt instant: re-initialize next tick
         changed = true;
         continue;
       }
-      if (now < at) continue;
+      if (!evaluation.due) continue;
+      const at = evaluation.at;
 
       occurrences.push({
         taskId: task.id,
@@ -308,20 +334,21 @@ export function tick(tasks, now) {
       });
 
       const advanced = advancePast(at, now, task.rule, task.zone);
-      if (advanced.next === null) {
+      const iso = advanced.next === null ? null : toIsoOrNull(advanced.next);
+      if (iso === null) {
         warnOnce(
-          `sched:${task.id}`,
+          `unschedulable:${task.id}`,
           `Loopo: cannot schedule "${task.id}" — rule or zone unusable.`
         );
         task.nextAt = null;
       } else {
         if (advanced.reason) {
           warnOnce(
-            `sched:${task.id}`,
+            `cap:${task.id}`,
             `Loopo: "${task.id}" missed more than ${STEP_CAP} occurrences — anchored from now.`
           );
         }
-        task.nextAt = new Date(advanced.next).toISOString();
+        task.nextAt = iso;
       }
       changed = true;
       continue;
@@ -330,8 +357,9 @@ export function tick(tasks, now) {
     if (task.kind === "date") {
       const evaluation = evaluateTask(task, now);
       if (!evaluation?.due || evaluation.daysLeft === null) continue;
-      if (dateEmitted.has(task.id)) continue;
-      dateEmitted.add(task.id);
+      const dateKey = `${task.id}:${task.targetDate}`;
+      if (dateEmitted.has(dateKey)) continue;
+      dateEmitted.add(dateKey);
       occurrences.push({
         taskId: task.id,
         kind: "date",

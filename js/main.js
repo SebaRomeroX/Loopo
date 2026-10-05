@@ -33,47 +33,53 @@ app.appendChild(listSlot);
 const warnedUnrenderable = new Set();
 
 /**
- * Display gate for untrusted stored entries: a task missing its kind's
- * fields must not blank the whole list (`taskDetail` throws loudly by
- * design). Skipped entries stay in `tasks` and are persisted untouched —
- * only the view skips them (T6 turns the warning into a banner).
+ * Display gate for untrusted stored entries: returns *why* the entry cannot
+ * be rendered, or null when it can (a task missing its kind's fields must
+ * not blank the whole list — `taskDetail` throws loudly by design).
+ * Skipped entries stay in `tasks` and are persisted untouched — only the
+ * view skips them (T6 turns the warning into a banner).
+ * @returns {null | string}
  */
-function isRenderable(task) {
-  if (!task || typeof task !== "object" || typeof task.title !== "string") {
-    return false;
+function renderProblem(task) {
+  if (!task || typeof task !== "object") return "not an object";
+  if (typeof task.title !== "string") return "missing title";
+  if (!KINDS.some((kind) => kind.id === task.kind)) {
+    return `unknown kind "${task.kind}"`;
   }
-  if (!KINDS.some((kind) => kind.id === task.kind)) return false;
   // The model promises a valid IANA zone (createTask); hand-edited storage
   // may break that and `Intl` would throw on the render path (counter
   // detail, engine scheduling). The engine guards itself as well.
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: task.zone });
   } catch {
-    return false;
+    return "invalid IANA zone";
   }
   if (task.kind === "loop") {
-    return (
-      !!task.rule &&
+    return !!task.rule &&
       Number.isFinite(task.rule.every) &&
       typeof task.rule.unit === "string"
-    );
+      ? null
+      : "loop missing rule fields";
   }
   if (task.kind === "date") {
-    return (
-      typeof task.targetDate === "string" &&
+    return typeof task.targetDate === "string" &&
       /^\d{4}-\d{2}-\d{2}$/.test(task.targetDate)
-    );
+      ? null
+      : "invalid targetDate";
   }
-  return typeof task.startedAt === "string" && !Number.isNaN(Date.parse(task.startedAt));
+  return typeof task.startedAt === "string" && !Number.isNaN(Date.parse(task.startedAt))
+    ? null
+    : "invalid startedAt";
 }
 
 function forDisplay(list) {
   return list.filter((task) => {
-    if (isRenderable(task)) return true;
+    const problem = renderProblem(task);
+    if (problem === null) return true;
     if (!warnedUnrenderable.has(task)) {
       warnedUnrenderable.add(task);
       console.warn(
-        `Loopo: skipping a stored task without a valid kind payload (${task?.id ?? "no id"}).`
+        `Loopo: skipping a stored task — ${problem} (id ${task?.id ?? "unknown"}).`
       );
     }
     return false;

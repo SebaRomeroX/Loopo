@@ -69,6 +69,9 @@ export function taskStatus(task, now) {
 
   switch (task.kind) {
     case "loop":
+      // Normally unreachable: every render path is preceded by a tick that
+      // advances a due loop past `now` — in-app loop indicators are meant to
+      // be driven by the occurrence stream (T5), not this badge.
       return evaluation.due ? { text: "Due now", due: true } : null;
     case "date": {
       if (evaluation.daysLeft === null) return null;
