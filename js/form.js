@@ -282,10 +282,12 @@ export function createForm(doc, { onSubmit }) {
 
     if (editing) {
       task.id = editing.id;
-      // A loop edit keeps its notification anchor (dedupe, T5) but restarts
-      // nextAt at null: a rule change invalidates the computed time and the
-      // reminder engine (T4) recomputes it.
-      if (task.kind === "loop" && "lastNotifiedAt" in editing) {
+      // An edit keeps the notification dedupe anchor (T5): occurrence
+      // identity is task id + occurrence instant, so a carried anchor stops
+      // an already-shown occurrence from firing again. A loop edit still
+      // restarts nextAt at null — a rule change invalidates the computed
+      // time and the reminder engine (T4) recomputes it.
+      if ("lastNotifiedAt" in editing) {
         task.lastNotifiedAt = editing.lastNotifiedAt;
       }
     }

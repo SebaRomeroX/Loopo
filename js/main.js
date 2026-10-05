@@ -8,14 +8,21 @@
  * open, on `visibilitychange` (back to visible) and on `focus` (spec
  * Synopsis): it initializes/advances loop `nextAt` (persisting only when it
  * actually advanced) and collects occurrences — the stream T5's in-tab
- * notifications will consume.
+ * notifications consume right here in `runEngine()` (dedupe + present via
+ * `js/notify.js`). The permission control lives in the page header and
+ * requests only from its button (user gesture).
  */
-import { loadTasks, saveTasks } from "./store.js";
+import { loadTasks, saveTasks, STORAGE_KEY } from "./store.js";
 import { KINDS } from "./kinds.js";
 import { renderEmptyState } from "./empty-state.js";
 import { renderList } from "./list.js";
 import { createForm } from "./form.js";
 import { tick } from "./engine.js";
+import {
+  consumeOccurrences,
+  createPermissionRow,
+  syncLastNotified,
+} from "./notify.js";
 
 const app = document.getElementById("app");
 
@@ -26,8 +33,14 @@ if (loaded.failure) {
 let tasks = loaded.tasks;
 
 const form = createForm(document, { onSubmit: commit });
+const noticesSlot = document.createElement("div");
+noticesSlot.className = "notices";
 const listSlot = document.createElement("div");
+document.querySelector(".app-header").appendChild(
+  createPermissionRow(document, window).element
+);
 app.appendChild(form.element);
+app.appendChild(noticesSlot);
 app.appendChild(listSlot);
 
 const warnedUnrenderable = new Set();
@@ -94,15 +107,23 @@ function persist() {
 }
 
 /**
- * Run the engine once; persist only when it advanced state (a fresh loop's
- * first `nextAt`, or a crossing moved past `now`).
+ * Run the engine once and surface what it found; persist only when
+ * something advanced (a fresh loop's first `nextAt`, a crossing moved past
+ * `now`, or a newly deduped notification anchor).
  * @param {{ persistChanges?: boolean }} options — `commit` passes false to
- *   fold its own write and the engine's into a single atomic `setItem`.
+ *   fold its own write and the engine's/notification anchors into a single
+ *   atomic `setItem`.
  */
 function runEngine({ persistChanges = true } = {}) {
-  const { changed } = tick(tasks, Date.now());
-  // tick() also yields `occurrences` — the stream T5's notifications consume.
-  if (changed && persistChanges) persist();
+  const { changed, occurrences } = tick(tasks, Date.now());
+  const surfaced = consumeOccurrences({
+    doc: document,
+    win: window,
+    tasks,
+    occurrences,
+    notices: noticesSlot,
+  }).changed;
+  if ((changed || surfaced) && persistChanges) persist();
 }
 
 function refresh() {
@@ -154,3 +175,19 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") refresh();
 });
 window.addEventListener("focus", refresh);
+
+// Cross-tab notification dedupe (spec row 15): when another tab shows an
+// occurrence it persists `lastNotifiedAt`, and this tab copies the anchor so
+// it never shows the same occurrence again. Only the anchor travels here —
+// full last-write-wins task convergence is T6.
+window.addEventListener("storage", (event) => {
+  if (event.key !== STORAGE_KEY || typeof event.newValue !== "string") return;
+  try {
+    const parsed = JSON.parse(event.newValue);
+    if (parsed && Array.isArray(parsed.tasks)) {
+      syncLastNotified(tasks, parsed.tasks);
+    }
+  } catch {
+    // Corrupt remote value: T6 shows the banner; the dedupe sync skips it.
+  }
+});

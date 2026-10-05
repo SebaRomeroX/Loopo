@@ -29,8 +29,9 @@ Loopo/
   index.html     # static shell: header, <noscript> fallback, #app mount point
   styles.css     # mobile-first styles — base targets 320 px, only widens on larger viewports
   js/            # app ES modules loaded directly (no build step, no dependencies):
-    main.js        # entry module: engine ticks (load/timer/visibility/focus), list/empty render, saves
+    main.js        # entry module: engine ticks (load/timer/visibility/focus), occurrence consumption, storage dedupe sync
     engine.js      # due computation: zone-correct loop steps, date countdown, occurrence stream (T5)
+    notify.js      # occurrence -> notification/in-app notice: gesture-gated permission, dedupe anchor, missed marker
     empty-state.js # first-run empty state: one example per reminder kind
     format.js      # task -> detail + due-status strings (engine-backed), textContent-only
     list.js        # task list: due badge, per-task Edit/Delete, textContent-only rendering

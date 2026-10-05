@@ -322,6 +322,78 @@ body {
   border-color: var(--danger);
 }
 
+/* ---- in-tab notifications (T5) ---- */
+
+.perm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.perm__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.notices:not(:empty) {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.notice--missed {
+  border-color: var(--danger);
+}
+
+.notice__body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.notice__kind {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.notice__title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.notice__detail {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.notice__missed {
+  flex: none;
+  padding: 2px 8px;
+  border: 1px solid var(--danger);
+  border-radius: 999px;
+  color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 /* ---- wider viewports: enhancement only ---- */
 
 @media (min-width: 640px) {

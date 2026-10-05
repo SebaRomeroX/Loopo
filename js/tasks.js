@@ -62,6 +62,7 @@ export function createTask({
         throw new Error("createTask: date needs targetDate as YYYY-MM-DD");
       }
       task.targetDate = targetDate;
+      task.lastNotifiedAt = null; // notification dedupe anchor (T5)
       break;
     }
     case "counter": {
