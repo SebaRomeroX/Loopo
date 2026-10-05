@@ -82,3 +82,15 @@ invariant 1 ("stored tasks are never destroyed on read") is implemented here.
   the primary key and a subsequent successful save would overwrite it — the
   T6 banner/save flow should warn or block saves after `unknown-version`.
   Full browser smoke re-run on the fixed code: every path green.
+
+### 2026-10-05 @SebaRomeroX
+Review verdict (arggon-reviewer, session ses_ef62d0e71ffewGxPWU01bFki35) — relayed by the coordinator; change requests applied.
+
+Verdict at review: NO-MERGE (small change request) → now satisfied:
+
+- blocker — `defaultStorage()` ran in the default-parameter position, outside every `try`: with blocked storage the `localStorage` *getter* itself throws SecurityError and escaped both functions, falsifying the module's "never throws / returns `unavailable`" contract in exactly the scenario the spec names (row 9). Fixed: storage resolved inside the first `try` of `loadTasks`/`saveTasks`. Regression: Node smoke case 13 (throwing getter → `unavailable` on both paths) + in-browser probe confirming it, page intact, console zero entries. Full browser smoke re-run green on the fixed code.
+- should-fix — `ARCHITECTURE.md` code map now lists `js/tasks.js` + `js/store.js` (same-PR doc travel, T1 precedent).
+- nit — failure messages tightened: "the stored value is left untouched; a backup copy is kept when possible" (never claim a possibly-skipped or older backup).
+- nits left as recorded — double-failure save window: design note for T6 recorded in the item Notes (warn/block saves after `unknown-version`); `JSON.stringify` outside the try stays (programmer errors loud, storage failures classified — now documented in code).
+
+Reviewer independently reproduced first-hand: 13-case smoke in /tmp, invariant-1 greps (zero `removeItem` anywhere; `localStorage` referenced only in store.js; unknown-version path = zero writes to the primary), migration step-chain incl. missing-step backup, five `createTask` throws, zero-line diff on T1 files, no package.json/deps, CI green (pinned seam), `arggon validate` green. Evidence table in the PR body and item Notes holds under re-execution.
